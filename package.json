@@ -5,6 +5,10 @@
   "repository": "https://github.com/eSpark/elm-template",
   "author": "eSpark",
   "license": "MIT",
+  "scripts": {
+    "dev": "npx foreman start",
+    "test": "npx elm-test"
+  },
   "devDependencies": {
     "elm": "0.19.0-bugfix2",
     "elm-live": "3.1.0",

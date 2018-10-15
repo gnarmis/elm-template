@@ -13,10 +13,10 @@ To setup:
 
 To run it:
 
-    bin/dev   # Start development server/db
+    yarn dev   # Start development server/db
 
 Visit `http://localhost:8000/` in your browser.
 
 To run tests:
 
-    bin/test
+    yarn test

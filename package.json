@@ -1,0 +1,8 @@
+{
+  "name": "elm-template",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/eSpark/elm-template",
+  "author": "eSpark",
+  "license": "MIT"
+}

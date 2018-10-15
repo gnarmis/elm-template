@@ -1,2 +1,21 @@
 elm-stuff
 index.html
+node_modules
+elm-stuff
+yarn-error.log
+
+# Distribution
+build/
+
+# elm-package generated files
+elm-stuff
+
+# elm-repl generated files
+repl-temp-*
+
+# Desktop Services Store on macOS
+.DS_Store
+
+*.local
+
+.vscode

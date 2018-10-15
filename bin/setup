@@ -1,5 +1,0 @@
-#!/bin/bash
-
-set -ex
-
-npm install -g foreman elm elm-test@beta

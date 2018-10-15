@@ -6,7 +6,7 @@
   "author": "eSpark",
   "license": "MIT",
   "scripts": {
-    "dev": "npx foreman start",
+    "dev": "npx nf start",
     "test": "npx elm-test"
   },
   "devDependencies": {

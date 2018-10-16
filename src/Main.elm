@@ -10,7 +10,7 @@ import Html.Attributes exposing (..)
 import Http
 import HttpHelper
 import Json.Decode as Decode
-import Mission exposing (Mission, MissionId)
+import Mission exposing (Mission, MissionId, unwrapId)
 import Routing exposing (Route(..), fromUrl)
 import Url
 
@@ -20,6 +20,7 @@ type alias Model =
     , gradeLevels : List GradeLevel
     , missions : List Mission
     , route : Maybe Route
+    , key : Nav.Key
     }
 
 
@@ -33,7 +34,7 @@ type Msg
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { gradeLevels = [], domains = [], missions = [], route = fromUrl url }
+    ( { gradeLevels = [], domains = [], missions = [], route = fromUrl url, key = key }
     , Cmd.batch
         [ Domain.fetchAll |> Http.send DomainsCompleted
         , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
@@ -68,8 +69,13 @@ update msg model =
         MissionsCompleted result ->
             ( { model | missions = dataFromResultOrDefault result model.missions }, Cmd.none )
 
-        LinkClicked _ ->
-            ( model, Cmd.none )
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                Browser.External href ->
+                    ( model, Nav.load href )
 
         ChangedUrl url ->
             ( { model | route = fromUrl url }, Cmd.none )
@@ -147,11 +153,14 @@ renderCurriculum { domains, gradeLevels, missions } =
 
         renderMissionCell : Mission -> Html msg
         renderMissionCell mission =
-            text
-                (String.fromInt mission.activeQuestCount
-                    ++ "/"
-                    ++ String.fromInt mission.inactiveQuestCount
-                )
+            a
+                [ href ("/missions/" ++ (unwrapId mission.id |> String.fromInt)) ]
+                [ text
+                    (String.fromInt mission.activeQuestCount
+                        ++ "/"
+                        ++ String.fromInt mission.inactiveQuestCount
+                    )
+                ]
     in
     table [] (renderHeader :: renderBody)
 

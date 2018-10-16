@@ -20,9 +20,13 @@ import Url
 
 
 type alias Model =
-    {}
+    {
+        missions : List Mission
+    ,   errors : List String
+    }
 
 
+-- with elm 19, onUrlChange and onUrlRequest are required to be handled (see Browser.application)
 type Msg
     = LinkClicked Browser.UrlRequest
     | ChangedUrl Url.Url
@@ -31,12 +35,20 @@ type Msg
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model, Cmd.none )
+--     ( Model [] [], Cmd.none )  <- here, Model is a constructor of the Model-like records defined above
+    ( { missions = [], errors = [] }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        MissionsLoaded (Err result) ->
+            ( { model | errors = [ "woopsie" ] }, Cmd.none )
+        MissionsLoaded (Ok value) ->
+            ( { model | missions = value }, Cmd.none )
+        -- you need to handle your messages, all of em!
+        _ ->
+            ( model, Cmd.none )
 
 
 view : Model -> Browser.Document Msg

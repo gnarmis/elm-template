@@ -22,8 +22,8 @@ import Dict exposing (Dict)
 
 type alias Model =
     { missions : Dict Int Mission
-    , gradeLevels : List GradeLevel
-    , domains : List Domain
+    , gradeLevels : Dict Int GradeLevel
+    , domains : Dict Int Domain
     , errors : List String
     }
 
@@ -144,7 +144,7 @@ type Msg
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     --     ( Model [] [], Cmd.none )  <- here, Model is a constructor of the Model-like records defined above
-    ( { missions = Dict.empty, gradeLevels = [], domains = [], errors = [] }, Cmd.batch [ getMissions, getGradeLevels, getDomains ] )
+    ( { missions = Dict.empty, gradeLevels = Dict.empty, domains = Dict.empty, errors = [] }, Cmd.batch [ getMissions, getGradeLevels, getDomains ] )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -165,13 +165,13 @@ update msg model =
                 ( { model | errors = [ "grade levels woopsie" ] }, Cmd.none )
 
             GradeLevelsLoaded (Ok value) ->
-                ( { model | gradeLevels = value }, Cmd.none )
+                ( { model | gradeLevels = toDict value }, Cmd.none )
 
             DomainsLoaded (Err result) ->
                 ( { model | errors = [ "domain woopsie" ] }, Cmd.none )
 
             DomainsLoaded (Ok value) ->
-                ( { model | domains = value }, Cmd.none )
+                ( { model | domains = toDict value }, Cmd.none )
 
             -- you need to handle your messages, all of em!
             _ ->
@@ -181,21 +181,21 @@ update msg model =
 view : Model -> Browser.Document Msg
 view model =
     let
-        toListItem : { a | id : Int } -> Html msg
-        toListItem item =
-            li [] [ Html.text (String.fromInt item.id) ]
+        -- toListItem : { a | id : Int } -> Html msg
+        -- toListItem item =
+        --     li [] [ Html.text (String.fromInt item.id) ]
 
-        missionsList : Html msg
-        missionsList =
-            ul [] (List.map toListItem model.missions)
+        -- missionsList : Html msg
+        -- missionsList =
+        --     ul [] (List.map toListItem model.missions)
 
-        gradeLevelsList : Html msg
-        gradeLevelsList =
-            ul [] (List.map toListItem model.gradeLevels)
+        -- gradeLevelsList : Html msg
+        -- gradeLevelsList =
+        --     ul [] (List.map toListItem model.gradeLevels)
 
-        domainsList : Html msg
-        domainsList =
-            ul [] (List.map toListItem model.domains)
+        -- domainsList : Html msg
+        -- domainsList =
+        --     ul [] (List.map toListItem model.domains)
 
         -- need to display list of tr's, which each have a list of td's
         -- for each tr, domain, we need a list of, to start with, mission ids
@@ -211,10 +211,60 @@ view model =
         --             model.gradeLevels
         --     model.domains
 
+        -- <table>
+        --     <tr><th></th><th></th>...</tr>
+        --     <tr>..</tr>
+        --     <tr>..</tr>
+        -- </table>
+
+        missionsByDomainAndGrade =
+            let
+                missionsList =
+                    Dict.values model.missions
+                missionIter mission  =
+                    ((mission.domainId, mission.gradeLevelId), mission)
+            in
+                -- Dict.fromList (
+                --     List.map
+                --         missionIter
+                --         (Dict.toList model.missions)
+                -- )
+                missionsList
+                    |> List.map missionIter
+                    |> Dict.fromList
+
+
+        -- missions =
+        --     List.map
+        --         (\domainId _ ->
+        --             List.map
+        --                 (\gradeId _ ->
+        --                     getMissionCell domainId gradeId)
+        --                 Dict.toList model.gradeLevels)
+        --         (Dict.toList model.domains)
+
+
+--             grade1       grade2
+-- domain1   mission_link  mission_link
+-- domain2   mission_link  mission_link
+
+
+--             grade1       grade2
+-- domain1   mission_id1     blank
+-- domain2   blank           blank
+
+        getMissionCell domainId gradeId =
+            Dict.get (domainId, gradeId) missionsByDomainAndGrade
+                |> Maybe.map toCell
+                |> Maybe.withDefault (td [] [ text "no mission" ])
+        toCell mission =
+            td [] [ String.fromInt mission.id |> text ]
+        tdList =
+            model.missions
     in
-    { title = "Test App"
-    , body = [ missionsList, gradeLevelsList, domainsList ]
-    }
+        { title = "Test App"
+        , body = [ text "render those missions!" ]
+        }
 
 
 subscriptions : Model -> Sub Msg

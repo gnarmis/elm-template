@@ -30,38 +30,34 @@ init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     ( { gradeLevels = [], domains = [] }
     , Cmd.batch
-        [ HttpHelper.get (Decode.list Domain.decoder) "//localhost:3000/domains" |> Http.send DomainsCompleted
-        , HttpHelper.get (Decode.list GradeLevel.decoder) "//localhost:3000/grade_levels" |> Http.send GradeLevelsCompleted
+        [ Domain.fetchAll |> Http.send DomainsCompleted
+        , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
         ]
     )
+
+
+dataFromResultOrDefault : Result Http.Error data -> data -> data
+dataFromResultOrDefault result default =
+    case result of
+        Ok data ->
+            data
+
+        Err err ->
+            let
+                _ =
+                    Debug.log "Domains foobar" err
+            in
+            default
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DomainsCompleted result ->
-            case result of
-                Ok domains ->
-                    ( { model | domains = domains }, Cmd.none )
-
-                Err err ->
-                    let
-                        _ =
-                            Debug.log "Domains foobar" err
-                    in
-                    ( model, Cmd.none )
+            ( { model | domains = dataFromResultOrDefault result model.domains }, Cmd.none )
 
         GradeLevelsCompleted result ->
-            case result of
-                Ok gradeLevels ->
-                    ( { model | gradeLevels = gradeLevels }, Cmd.none )
-
-                Err err ->
-                    let
-                        _ =
-                            Debug.log "Grade level foobar" err
-                    in
-                    ( model, Cmd.none )
+            ( { model | gradeLevels = dataFromResultOrDefault result model.gradeLevels }, Cmd.none )
 
         LinkClicked _ ->
             ( model, Cmd.none )

@@ -4,12 +4,16 @@ import Http
 import Json.Decode exposing (Decoder)
 
 
+serverBase =
+    "//localhost:3000"
+
+
 makeRequest : String -> Decoder a -> String -> Http.Body -> Http.Request a
 makeRequest verb decoder url body =
     Http.request
         { method = verb
         , headers = []
-        , url = url
+        , url = serverBase ++ url
         , body = body
         , expect = Http.expectJson decoder
         , timeout = Nothing

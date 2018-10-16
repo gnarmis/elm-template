@@ -1,5 +1,6 @@
-module GradeLevel exposing (GradeLevel, decoder, unwrapId)
+module GradeLevel exposing (GradeLevel, decoder, fetchAll, unwrapId)
 
+import HttpHelper
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -25,3 +26,7 @@ decoder =
 unwrapId : GradeLevelId -> Int
 unwrapId (GradeLevelId id) =
     id
+
+
+fetchAll =
+    HttpHelper.get (Decode.list decoder) "/grade_levels"

@@ -1,4 +1,4 @@
-module GradeLevel exposing (GradeLevel, decoder)
+module GradeLevel exposing (GradeLevel, decoder, unwrapId)
 
 import Json.Decode as Decode exposing (Decoder)
 
@@ -20,3 +20,8 @@ decoder =
         (Decode.field "id" (Decode.int |> Decode.map GradeLevelId))
         (Decode.field "code" Decode.string)
         (Decode.field "description" Decode.string)
+
+
+unwrapId : GradeLevelId -> Int
+unwrapId (GradeLevelId id) =
+    id

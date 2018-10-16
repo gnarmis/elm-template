@@ -2,13 +2,14 @@ module Main exposing (Model)
 
 import Browser
 import Browser.Navigation as Nav
+import GradeLevel exposing (GradeLevel)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Url
 
 
 type alias Model =
-    {}
+    { gradeLevels : List GradeLevel }
 
 
 type Msg
@@ -18,7 +19,9 @@ type Msg
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model, Cmd.none )
+    ( { gradeLevels = [] }
+    , Cmd.none
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

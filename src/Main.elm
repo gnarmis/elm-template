@@ -70,40 +70,40 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Test App"
     , body =
-        [ div [] (model.domains |> List.map renderDomain)
-        , div [] (model.gradeLevels |> List.map renderGradeLevel)
+        [ renderTable model.domains model.gradeLevels
         ]
     }
 
 
+renderTable : List Domain -> List GradeLevel -> Html msg
+renderTable domains gradeLevels =
+    let
+        renderHeader =
+            tr []
+                (th [] []
+                    :: (gradeLevels
+                            |> List.map
+                                (\gradeLevel ->
+                                    th [] [ text gradeLevel.code ]
+                                )
+                       )
+                )
 
--- TODO: delete when rendering real things
+        renderBody =
+            domains
+                |> List.map
+                    (\domain ->
+                        tr []
+                            (th [] [ text domain.code ]
+                                :: (gradeLevels |> List.map (renderCell domain))
+                            )
+                    )
 
-
-renderDomain : Domain -> Html nop
-renderDomain domain =
-    p []
-        [ renderPair "ID" (Domain.unwrapId domain.id |> String.fromInt)
-        , renderPair "Code" domain.code
-        , renderPair "Description" domain.description
-        ]
-
-
-renderGradeLevel : GradeLevel -> Html nop
-renderGradeLevel gradeLevel =
-    p []
-        [ renderPair "ID" (GradeLevel.unwrapId gradeLevel.id |> String.fromInt)
-        , renderPair "Code" gradeLevel.code
-        , renderPair "Description" gradeLevel.description
-        ]
-
-
-renderPair : String -> String -> Html nop
-renderPair title body =
-    div []
-        [ strong [] [ text title ]
-        , span [] [ text (" " ++ body) ]
-        ]
+        renderCell : Domain -> GradeLevel -> Html msg
+        renderCell domain gradeLevel =
+            td [] []
+    in
+    table [] (renderHeader :: renderBody)
 
 
 subscriptions : Model -> Sub Msg

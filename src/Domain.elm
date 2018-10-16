@@ -1,4 +1,4 @@
-module Domain exposing (Domain, decoder, fetchAll, unwrapId)
+module Domain exposing (Domain, DomainId(..), decoder, fetchAll, unwrapDomainId)
 
 import HttpHelper
 import Json.Decode as Decode exposing (Decoder)
@@ -23,8 +23,8 @@ decoder =
         (Decode.field "description" Decode.string)
 
 
-unwrapId : DomainId -> Int
-unwrapId (DomainId id) =
+unwrapDomainId : DomainId -> Int
+unwrapDomainId (DomainId id) =
     id
 
 

@@ -10,12 +10,14 @@ import Html.Attributes exposing (..)
 import Http
 import HttpHelper
 import Json.Decode as Decode
+import Mission exposing (Mission)
 import Url
 
 
 type alias Model =
     { domains : List Domain
     , gradeLevels : List GradeLevel
+    , missions : List Mission
     }
 
 
@@ -24,14 +26,16 @@ type Msg
     | ChangedUrl Url.Url
     | DomainsCompleted (Result Http.Error (List Domain))
     | GradeLevelsCompleted (Result Http.Error (List GradeLevel))
+    | MissionsCompleted (Result Http.Error (List Mission))
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { gradeLevels = [], domains = [] }
+    ( { gradeLevels = [], domains = [], missions = [] }
     , Cmd.batch
         [ Domain.fetchAll |> Http.send DomainsCompleted
         , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
+        , Mission.fetchAll |> Http.send MissionsCompleted
         ]
     )
 
@@ -59,6 +63,9 @@ update msg model =
         GradeLevelsCompleted result ->
             ( { model | gradeLevels = dataFromResultOrDefault result model.gradeLevels }, Cmd.none )
 
+        MissionsCompleted result ->
+            ( { model | missions = dataFromResultOrDefault result model.missions }, Cmd.none )
+
         LinkClicked _ ->
             ( model, Cmd.none )
 
@@ -70,13 +77,13 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Test App"
     , body =
-        [ renderTable model.domains model.gradeLevels
+        [ renderTable model
         ]
     }
 
 
-renderTable : List Domain -> List GradeLevel -> Html msg
-renderTable domains gradeLevels =
+renderTable : Model -> Html msg
+renderTable { domains, gradeLevels, missions } =
     let
         renderHeader =
             tr []
@@ -101,7 +108,20 @@ renderTable domains gradeLevels =
 
         renderCell : Domain -> GradeLevel -> Html msg
         renderCell domain gradeLevel =
-            td [] []
+            let
+                cellMissions =
+                    missions |> List.filter (\m -> m.domainId == domain.id && m.gradeLevelId == gradeLevel.id)
+            in
+            td []
+                (cellMissions |> List.map renderMission)
+
+        renderMission : Mission -> Html msg
+        renderMission mission =
+            text
+                (String.fromInt mission.activeQuestCount
+                    ++ "/"
+                    ++ String.fromInt mission.inactiveQuestCount
+                )
     in
     table [] (renderHeader :: renderBody)
 

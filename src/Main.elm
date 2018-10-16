@@ -10,9 +10,9 @@ import Html.Attributes exposing (..)
 import Http
 import HttpHelper
 import Json.Decode as Decode
-import Mission exposing (Mission)
-import Url
+import Mission exposing (Mission, MissionId)
 import Routing exposing (Route(..), fromUrl)
+import Url
 
 
 type alias Model =
@@ -72,8 +72,7 @@ update msg model =
             ( model, Cmd.none )
 
         ChangedUrl url ->
-
-            ( {model | route = fromUrl url}, Cmd.none )
+            ( { model | route = fromUrl url }, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
@@ -86,16 +85,35 @@ view model =
 renderRoute : Model -> List (Html msg)
 renderRoute model =
     case model.route of
-        (Just CurriculumRoute) ->
-            [ renderTable model
+        Just CurriculumRoute ->
+            [ renderCurriculum model
             ]
-        (Just (MissionRoute missionId)) ->
-            [ div [] [text (Debug.toString missionId)]]
-        Nothing ->
-            [ h2 [] [text "Error!, no route found"]]
 
-renderTable : Model -> Html msg
-renderTable { domains, gradeLevels, missions } =
+        Just (MissionRoute missionId) ->
+            [ renderMission model missionId ]
+
+        Nothing ->
+            [ h2 [] [ text "Error!, no route found" ] ]
+
+
+renderMission : Model -> MissionId -> Html msg
+renderMission model missionId =
+    let
+        mission =
+            model.missions
+                |> List.filter (\m -> m.id == missionId)
+                |> List.head
+    in
+    case mission of
+        Just aMission ->
+            div [] [ text (Debug.toString aMission) ]
+
+        Nothing ->
+            div [] [ text "Mission missing!" ]
+
+
+renderCurriculum : Model -> Html msg
+renderCurriculum { domains, gradeLevels, missions } =
     let
         renderHeader =
             tr []
@@ -125,10 +143,10 @@ renderTable { domains, gradeLevels, missions } =
                     missions |> List.filter (\m -> m.domainId == domain.id && m.gradeLevelId == gradeLevel.id)
             in
             td []
-                (cellMissions |> List.map renderMission)
+                (cellMissions |> List.map renderMissionCell)
 
-        renderMission : Mission -> Html msg
-        renderMission mission =
+        renderMissionCell : Mission -> Html msg
+        renderMissionCell mission =
             text
                 (String.fromInt mission.activeQuestCount
                     ++ "/"

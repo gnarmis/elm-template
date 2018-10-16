@@ -36,7 +36,7 @@ type Msg
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
 --     ( Model [] [], Cmd.none )  <- here, Model is a constructor of the Model-like records defined above
-    ( { missions = [], errors = [] }, Cmd.none )
+    ( { missions = [], errors = [] }, getMissions )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,9 +53,13 @@ update msg model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Test App"
-    , body = [ text "Test Body" ]
-    }
+    let
+        missionToListItem mission = li [] [ text (String.fromInt mission.id) ]
+        missionsList = ul [] (List.map missionToListItem model.missions)
+    in
+        { title = "Test App"
+        , body = [missionsList]
+        }
 
 
 subscriptions : Model -> Sub Msg

@@ -26,7 +26,7 @@ type alias Model =
 type Msg
     = LinkClicked Browser.UrlRequest
     | ChangedUrl Url.Url
-    | Funsies Result
+    | MissionsLoaded (Result Http.Error (List Mission))
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -73,14 +73,14 @@ missionDecoder =
 
 -- handleRequestComplete : Result Http.Error (List String) -> Msg
 -- handleRequestComplete result =
---     Funsies result
+--     MissionsLoaded result
     -- something here
 
-getMissions : String -> Cmd Msg
+getMissions : Cmd Msg
 getMissions =
     HttpBuilder.get "http://localhost:3000/missions"
-        |> HttpBuilder.withExpectJson missionDecoder
-        |> Http.send Funsies
+        |> HttpBuilder.withExpectJson (Decode.list missionDecoder)
+        |> HttpBuilder.send MissionsLoaded
 
 -- MAIN
 

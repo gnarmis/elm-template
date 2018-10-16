@@ -17,10 +17,11 @@ import HttpBuilder exposing (..)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Url
+import Dict exposing (Dict)
 
 
 type alias Model =
-    { missions : List Mission
+    { missions : Dict Int Mission
     , gradeLevels : List GradeLevel
     , domains : List Domain
     , errors : List String
@@ -143,33 +144,38 @@ type Msg
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     --     ( Model [] [], Cmd.none )  <- here, Model is a constructor of the Model-like records defined above
-    ( { missions = [], gradeLevels = [], domains = [], errors = [] }, Cmd.batch [ getMissions, getGradeLevels, getDomains ] )
+    ( { missions = Dict.empty, gradeLevels = [], domains = [], errors = [] }, Cmd.batch [ getMissions, getGradeLevels, getDomains ] )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        MissionsLoaded (Err result) ->
-            ( { model | errors = [ "missions woopsie" ] }, Cmd.none )
+    let
+        toDict resourcesList =
+            List.map (\item -> (item.id, item)) resourcesList
+                |> Dict.fromList
+    in
+        case msg of
+            MissionsLoaded (Err result) ->
+                ( { model | errors = [ "missions woopsie" ] }, Cmd.none )
 
-        MissionsLoaded (Ok value) ->
-            ( { model | missions = value }, Cmd.none )
+            MissionsLoaded (Ok value) ->
+                ( { model | missions = toDict value }, Cmd.none )
 
-        GradeLevelsLoaded (Err result) ->
-            ( { model | errors = [ "grade levels woopsie" ] }, Cmd.none )
+            GradeLevelsLoaded (Err result) ->
+                ( { model | errors = [ "grade levels woopsie" ] }, Cmd.none )
 
-        GradeLevelsLoaded (Ok value) ->
-            ( { model | gradeLevels = value }, Cmd.none )
+            GradeLevelsLoaded (Ok value) ->
+                ( { model | gradeLevels = value }, Cmd.none )
 
-        DomainsLoaded (Err result) ->
-            ( { model | errors = [ "domain woopsie" ] }, Cmd.none )
+            DomainsLoaded (Err result) ->
+                ( { model | errors = [ "domain woopsie" ] }, Cmd.none )
 
-        DomainsLoaded (Ok value) ->
-            ( { model | domains = value }, Cmd.none )
+            DomainsLoaded (Ok value) ->
+                ( { model | domains = value }, Cmd.none )
 
-        -- you need to handle your messages, all of em!
-        _ ->
-            ( model, Cmd.none )
+            -- you need to handle your messages, all of em!
+            _ ->
+                ( model, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
@@ -190,6 +196,21 @@ view model =
         domainsList : Html msg
         domainsList =
             ul [] (List.map toListItem model.domains)
+
+        -- need to display list of tr's, which each have a list of td's
+        -- for each tr, domain, we need a list of, to start with, mission ids
+
+        -- missionsByGradeLevelAndDomain =
+        --     List.map (\x -> )  model.domains
+        -- what we want: [(1,2), (3,4)]..., where it's (domain_id, grade_id)
+
+        -- List.map
+        --     \domain ->
+        --         List.zip
+        --             List.repeat (List.length model.gradeLevels) domain.id
+        --             model.gradeLevels
+        --     model.domains
+
     in
     { title = "Test App"
     , body = [ missionsList, gradeLevelsList, domainsList ]

@@ -20,55 +20,13 @@ import Url
 
 
 type alias Model =
-    {
-        missions : List Mission
-    ,   errors : List String
+    { missions : List Mission
+    , errors : List String
     }
 
 
--- with elm 19, onUrlChange and onUrlRequest are required to be handled (see Browser.application)
-type Msg
-    = LinkClicked Browser.UrlRequest
-    | ChangedUrl Url.Url
-    | MissionsLoaded (Result Http.Error (List Mission))
 
-
-init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
---     ( Model [] [], Cmd.none )  <- here, Model is a constructor of the Model-like records defined above
-    ( { missions = [], errors = [] }, getMissions )
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        MissionsLoaded (Err result) ->
-            ( { model | errors = [ "woopsie" ] }, Cmd.none )
-        MissionsLoaded (Ok value) ->
-            ( { model | missions = value }, Cmd.none )
-        -- you need to handle your messages, all of em!
-        _ ->
-            ( model, Cmd.none )
-
-
-view : Model -> Browser.Document Msg
-view model =
-    let
-        missionToListItem mission = li [] [ text (String.fromInt mission.id) ]
-        missionsList = ul [] (List.map missionToListItem model.missions)
-    in
-        { title = "Test App"
-        , body = [missionsList]
-        }
-
-
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
-
-
-
--- Missions --
+-- BEGIN MISSIONS MODEL
 
 
 type alias Mission =
@@ -77,8 +35,11 @@ type alias Mission =
     , gradeLevelId : Int
     }
 
+
+
 -- decoders have to be in the same order as the model properties
 -- https://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#map2
+
 
 missionDecoder : Decode.Decoder Mission
 missionDecoder =
@@ -87,16 +48,65 @@ missionDecoder =
         (Decode.field "domain_id" Decode.int)
         (Decode.field "grade_level_id" Decode.int)
 
--- handleRequestComplete : Result Http.Error (List String) -> Msg
--- handleRequestComplete result =
---     MissionsLoaded result
-    -- something here
 
 getMissions : Cmd Msg
 getMissions =
     HttpBuilder.get "http://localhost:3000/missions"
         |> HttpBuilder.withExpectJson (Decode.list missionDecoder)
         |> HttpBuilder.send MissionsLoaded
+
+
+
+-- END MISSIONS MODEL
+
+
+{-| with elm 19, onUrlChange and onUrlRequest are required to be handled (see Browser.application)
+-}
+type Msg
+    = LinkClicked Browser.UrlRequest
+    | ChangedUrl Url.Url
+    | MissionsLoaded (Result Http.Error (List Mission))
+
+
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
+    --     ( Model [] [], Cmd.none )  <- here, Model is a constructor of the Model-like records defined above
+    ( { missions = [], errors = [] }, getMissions )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        MissionsLoaded (Err result) ->
+            ( { model | errors = [ "woopsie" ] }, Cmd.none )
+
+        MissionsLoaded (Ok value) ->
+            ( { model | missions = value }, Cmd.none )
+
+        -- you need to handle your messages, all of em!
+        _ ->
+            ( model, Cmd.none )
+
+
+view : Model -> Browser.Document Msg
+view model =
+    let
+        missionToListItem mission =
+            li [] [ text (String.fromInt mission.id) ]
+
+        missionsList =
+            ul [] (List.map missionToListItem model.missions)
+    in
+    { title = "Test App"
+    , body = [ missionsList ]
+    }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
+
+
 
 -- MAIN
 

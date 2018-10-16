@@ -35,6 +35,8 @@ type alias Mission =
     { id : Int
     , domainId : Int
     , gradeLevelId : Int
+    , helpText : String
+    , active : Bool
     }
 
 
@@ -45,10 +47,12 @@ type alias Mission =
 
 missionDecoder : Decode.Decoder Mission
 missionDecoder =
-    Decode.map3 Mission
+    Decode.map5 Mission
         (Decode.field "id" Decode.int)
         (Decode.field "domain_id" Decode.int)
         (Decode.field "grade_level_id" Decode.int)
+        (Decode.field "help_text" Decode.string)
+        (Decode.field "active" Decode.bool)
 
 
 getMissions : Cmd Msg

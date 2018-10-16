@@ -1,4 +1,4 @@
-module Main exposing (Model)
+module Main exposing (Domain, GradeLevel, Mission, Model, Msg(..), domainDecoder, getDomains, getGradeLevels, getMissions, gradeLevelDecoder, init, main, missionDecoder, subscriptions, update, view)
 
 -- start the following are needed for fetching and decoding the data
 -- https://github.com/lukewestby/elm-http-builder
@@ -22,6 +22,7 @@ import Url
 type alias Model =
     { missions : List Mission
     , gradeLevels : List GradeLevel
+    , domains : List Domain
     , errors : List String
     }
 
@@ -90,7 +91,39 @@ getGradeLevels =
 
 
 
--- END MISSIONS MODEL
+-- END GRADELEVELS MODEL
+-- BEGIN DOMAINS MODEL
+
+
+type alias Domain =
+    { id : Int
+    , code : String
+    , description : String
+    }
+
+
+
+-- decoders have to be in the same order as the model properties
+-- https://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#map2
+
+
+domainDecoder : Decode.Decoder Domain
+domainDecoder =
+    Decode.map3 Domain
+        (Decode.field "id" Decode.int)
+        (Decode.field "code" Decode.string)
+        (Decode.field "description" Decode.string)
+
+
+getDomains : Cmd Msg
+getDomains =
+    HttpBuilder.get "http://localhost:3000/domains"
+        |> HttpBuilder.withExpectJson (Decode.list domainDecoder)
+        |> HttpBuilder.send DomainsLoaded
+
+
+
+-- END GRADELEVELS MODEL
 
 
 {-| with elm 19, onUrlChange and onUrlRequest are required to be handled (see Browser.application)
@@ -100,12 +133,13 @@ type Msg
     | ChangedUrl Url.Url
     | MissionsLoaded (Result Http.Error (List Mission))
     | GradeLevelsLoaded (Result Http.Error (List GradeLevel))
+    | DomainsLoaded (Result Http.Error (List Domain))
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     --     ( Model [] [], Cmd.none )  <- here, Model is a constructor of the Model-like records defined above
-    ( { missions = [], gradeLevels = [], errors = [] }, Cmd.batch [ getMissions, getGradeLevels ] )
+    ( { missions = [], gradeLevels = [], domains = [], errors = [] }, Cmd.batch [ getMissions, getGradeLevels, getDomains ] )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -123,6 +157,12 @@ update msg model =
         GradeLevelsLoaded (Ok value) ->
             ( { model | gradeLevels = value }, Cmd.none )
 
+        DomainsLoaded (Err result) ->
+            ( { model | errors = [ "domain woopsie" ] }, Cmd.none )
+
+        DomainsLoaded (Ok value) ->
+            ( { model | domains = value }, Cmd.none )
+
         -- you need to handle your messages, all of em!
         _ ->
             ( model, Cmd.none )
@@ -131,22 +171,24 @@ update msg model =
 view : Model -> Browser.Document Msg
 view model =
     let
-        missionToListItem mission =
-            li [] [ text (String.fromInt mission.id) ]
+        toListItem : { a | id : Int } -> Html msg
+        toListItem item =
+            li [] [ Html.text (String.fromInt item.id) ]
 
         missionsList : Html msg
         missionsList =
-            ul [] (List.map missionToListItem model.missions)
-
-        gradeLevelsToListItem gradeLevel =
-            li [] [ text (String.fromInt gradeLevel.id) ]
+            ul [] (List.map toListItem model.missions)
 
         gradeLevelsList : Html msg
         gradeLevelsList =
-            ul [] (List.map gradeLevelsToListItem model.gradeLevels)
+            ul [] (List.map toListItem model.gradeLevels)
+
+        domainsList : Html msg
+        domainsList =
+            ul [] (List.map toListItem model.domains)
     in
     { title = "Test App"
-    , body = [ missionsList, gradeLevelsList ]
+    , body = [ missionsList, gradeLevelsList, domainsList ]
     }
 
 

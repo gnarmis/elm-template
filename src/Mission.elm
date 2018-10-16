@@ -1,4 +1,4 @@
-module Mission exposing (Mission, decoder, fetchAll, unwrapId)
+module Mission exposing (Mission, MissionId(..), decoder, fetchAll, unwrapId)
 
 import Domain exposing (DomainId(..))
 import GradeLevel exposing (GradeLevelId(..))

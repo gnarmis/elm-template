@@ -12,12 +12,14 @@ import HttpHelper
 import Json.Decode as Decode
 import Mission exposing (Mission)
 import Url
+import Routing exposing (Route(..), fromUrl)
 
 
 type alias Model =
     { domains : List Domain
     , gradeLevels : List GradeLevel
     , missions : List Mission
+    , route : Maybe Route
     }
 
 
@@ -31,7 +33,7 @@ type Msg
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { gradeLevels = [], domains = [], missions = [] }
+    ( { gradeLevels = [], domains = [], missions = [], route = fromUrl url }
     , Cmd.batch
         [ Domain.fetchAll |> Http.send DomainsCompleted
         , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
@@ -69,18 +71,28 @@ update msg model =
         LinkClicked _ ->
             ( model, Cmd.none )
 
-        ChangedUrl _ ->
-            ( model, Cmd.none )
+        ChangedUrl url ->
+
+            ( {model | route = fromUrl url}, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
 view model =
     { title = "Test App"
-    , body =
-        [ renderTable model
-        ]
+    , body = renderRoute model
     }
 
+
+renderRoute : Model -> List (Html msg)
+renderRoute model =
+    case model.route of
+        (Just CurriculumRoute) ->
+            [ renderTable model
+            ]
+        (Just (MissionRoute missionId)) ->
+            [ div [] [text (Debug.toString missionId)]]
+        Nothing ->
+            [ h2 [] [text "Error!, no route found"]]
 
 renderTable : Model -> Html msg
 renderTable { domains, gradeLevels, missions } =

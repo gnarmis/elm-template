@@ -1,6 +1,6 @@
 module GradeLevel exposing (GradeLevel, GradeLevelId(..), decoder, fetchAll, unwrapGradeLevelId)
 
-import HttpHelper
+import Http
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -29,4 +29,4 @@ unwrapGradeLevelId (GradeLevelId id) =
 
 
 fetchAll =
-    HttpHelper.get (Decode.list decoder) "/grade_levels"
+    Http.get "//localhost:3000/grade_levels" (Decode.list decoder)

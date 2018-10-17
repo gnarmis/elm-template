@@ -1,6 +1,6 @@
 module Domain exposing (Domain, DomainId(..), decoder, fetchAll, unwrapDomainId)
 
-import HttpHelper
+import Http
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -29,4 +29,4 @@ unwrapDomainId (DomainId id) =
 
 
 fetchAll =
-    HttpHelper.get (Decode.list decoder) "/domains"
+    Http.get "//localhost:3000/domains" (Decode.list decoder)

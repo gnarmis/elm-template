@@ -2,7 +2,7 @@ module Mission exposing (Mission, MissionId(..), decoder, fetchAll, unwrapId)
 
 import Domain exposing (DomainId(..))
 import GradeLevel exposing (GradeLevelId(..))
-import HttpHelper
+import Http
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -39,4 +39,4 @@ unwrapId (MissionId id) =
 
 
 fetchAll =
-    HttpHelper.get (Decode.list decoder) "/missions"
+    Http.get "//localhost:3000/missions" (Decode.list decoder)

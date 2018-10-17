@@ -8,7 +8,6 @@ import GradeLevel exposing (GradeLevel)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
-import HttpHelper
 import Json.Decode as Decode
 import Mission exposing (Mission, MissionId, unwrapId)
 import Routing exposing (Route(..), fromUrl)

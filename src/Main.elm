@@ -19,10 +19,15 @@ type alias Model =
     , gradeLevels : RemoteData Http.Error (List GradeLevel)
     , missions : RemoteData Http.Error (List Mission)
     , route : Maybe Route
+
+    -- session key that's initialized on init and then saved
     , key : Nav.Key
     }
 
 
+{-| down the road, could import package directly -- but this is already based on
+the blog post, so it matches
+-}
 type RemoteData e a
     = NotAsked
     | Loading

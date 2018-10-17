@@ -94,8 +94,21 @@ update msg model =
         MissionUpdated (Err result) ->
             ( { model | errors = result :: model.errors }, Cmd.none )
 
-        MissionUpdated (Ok value) ->
-            ( model, Mission.fetchAll |> HttpBuilder.send MissionsCompleted )
+        MissionUpdated (Ok mission) ->
+            case model.missions of
+                NotAsked ->
+                    -- TODO: we really shouldn't be here
+                    ( model, Mission.fetchAll |> HttpBuilder.send MissionsCompleted )
+
+                Failure err ->
+                    ( model, Mission.fetchAll |> HttpBuilder.send MissionsCompleted )
+
+                Loading ->
+                    ( model, Mission.fetchAll |> HttpBuilder.send MissionsCompleted )
+
+                Success missions ->
+                    -- TODO: resolve uniques
+                    ( { model | missionForm = Nothing, missions = Success (mission :: missions) }, Cmd.none )
 
         SubmitMission ->
             ( model
@@ -147,6 +160,7 @@ renderMission model missionId =
             case model.missionForm of
                 Just mission ->
                     Just mission
+
                 Nothing ->
                     missions
                         |> List.filter (\m -> m.id == missionId)
@@ -180,10 +194,12 @@ renderMissionUpdateForm mission =
             ]
         , p []
             [ text "Help Text: "
-            , input [
-                type_ "text"
+            , input
+                [ type_ "text"
                 , value (Maybe.withDefault "" mission.helpText)
-                ,  onInput (MissionHelpTextEntered mission)] []
+                , onInput (MissionHelpTextEntered mission)
+                ]
+                []
             ]
         , p []
             [ input [ type_ "submit" ] [ text "save" ] ]

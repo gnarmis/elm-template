@@ -6,10 +6,10 @@ import Debug
 import Domain exposing (Domain)
 import GradeLevel exposing (GradeLevel)
 import Html exposing (..)
-import HttpBuilder
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
+import HttpBuilder
 import Json.Decode as Decode
 import Mission exposing (Mission, MissionId, unwrapId)
 import Routing exposing (Route(..))
@@ -43,7 +43,8 @@ type Msg
     | DomainsCompleted (Result Http.Error (List Domain))
     | GradeLevelsCompleted (Result Http.Error (List GradeLevel))
     | MissionsCompleted (Result Http.Error (List Mission))
-    | MissionActiveCheckboxChecked Bool
+    | MissionActiveCheckboxChecked Mission Bool
+    | MissionUpdated (Result Http.Error Mission)
 
 
 fromResult : Result e a -> RemoteData e a
@@ -79,8 +80,15 @@ update msg model =
         MissionsCompleted result ->
             ( { model | missions = fromResult result }, Cmd.none )
 
-        MissionActiveCheckboxChecked bool ->
+        MissionActiveCheckboxChecked mission bool ->
+            ( model, Mission.updateMission { mission | active = bool } |> HttpBuilder.send MissionUpdated )
+
+        -- if we were to full-refresh Missions list in model, we could skip the need for MissionUpdated-like message by instead using Tasks
+        MissionUpdated (Err result) ->
             ( model, Cmd.none )
+
+        MissionUpdated (Ok value) ->
+            ( model, Mission.fetchAll |> HttpBuilder.send MissionsCompleted )
 
         LinkClicked (Browser.Internal url) ->
             ( model, Nav.pushUrl model.navSessionKey (Url.toString url) )
@@ -134,7 +142,7 @@ renderMission model missionId =
         Success missions ->
             case findMission missions of
                 Just aMission ->
-                    div [] [renderMissionUpdateForm aMission]
+                    div [] [ renderMissionUpdateForm aMission ]
 
                 Nothing ->
                     div [] [ text "Mission missing!" ]
@@ -145,7 +153,7 @@ renderMissionUpdateForm mission =
         [ p [] [ text "Mission ID", Mission.unwrapId mission.id |> String.fromInt |> text ]
         , p []
             [ text "Active?"
-            , input [ type_ "checkbox", checked mission.active, onCheck MissionActiveCheckboxChecked ] []
+            , input [ type_ "checkbox", checked mission.active, onCheck (MissionActiveCheckboxChecked mission) ] []
             ]
         ]
 

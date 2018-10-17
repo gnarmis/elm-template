@@ -1,9 +1,10 @@
-module Mission exposing (Mission, MissionId(..), decoder, fetchAll, unwrapId)
+module Mission exposing (Mission, MissionId(..), decoder, fetchAll, unwrapId, updateMission)
 
 import Domain exposing (DomainId(..))
 import GradeLevel exposing (GradeLevelId(..))
 import HttpBuilder
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 
 
 type MissionId
@@ -32,6 +33,11 @@ decoder =
         (Decode.field "help_text" (Decode.nullable Decode.string))
         (Decode.field "active" Decode.bool)
 
+encoder : Mission -> Encode.Value
+encoder mission =
+    Encode.object
+        [("id", Encode.int (unwrapId mission.id))
+        , ("active", Encode.bool mission.active)]
 
 unwrapId : MissionId -> Int
 unwrapId (MissionId id) =
@@ -41,3 +47,8 @@ unwrapId (MissionId id) =
 fetchAll =
     HttpBuilder.get "//localhost:3000/missions"
         |> HttpBuilder.withExpectJson (Decode.list decoder)
+
+updateMission mission =
+    HttpBuilder.patch ("//localhost:3000/missions/" ++ (unwrapId mission.id |> String.fromInt))
+        |> HttpBuilder.withJsonBody (encoder mission)
+        |> HttpBuilder.withExpectJson decoder

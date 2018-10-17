@@ -10,7 +10,7 @@ import Html.Attributes exposing (..)
 import Http
 import Json.Decode as Decode
 import Mission exposing (Mission, MissionId, unwrapId)
-import Routing exposing (Route(..), fromUrl)
+import Routing exposing (Route(..))
 import Url
 
 
@@ -33,7 +33,7 @@ type Msg
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { gradeLevels = [], domains = [], missions = [], route = fromUrl url, key = key }
+    ( { gradeLevels = [], domains = [], missions = [], route = Routing.fromUrl url, key = key }
     , Cmd.batch
         [ Domain.fetchAll |> Http.send DomainsCompleted
         , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
@@ -75,7 +75,7 @@ update msg model =
             ( model, Nav.load href )
 
         ChangedUrl url ->
-            ( { model | route = fromUrl url }, Cmd.none )
+            ( { model | route = Routing.fromUrl url }, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
@@ -150,8 +150,8 @@ renderCurriculum { domains, gradeLevels, missions } =
 
         renderMissionCell : Mission -> Html msg
         renderMissionCell mission =
-            a
-                [ href ("/missions/" ++ (unwrapId mission.id |> String.fromInt)) ]
+            Routing.link (MissionRoute mission.id)
+                []
                 [ text
                     (String.fromInt mission.activeQuestCount
                         ++ "/"

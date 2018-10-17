@@ -68,13 +68,11 @@ update msg model =
         MissionsCompleted result ->
             ( { model | missions = dataFromResultOrDefault result model.missions }, Cmd.none )
 
-        LinkClicked urlRequest ->
-            case urlRequest of
-                Browser.Internal url ->
-                    ( model, Nav.pushUrl model.key (Url.toString url) )
+        LinkClicked (Browser.Internal url) ->
+            ( model, Nav.pushUrl model.key (Url.toString url) )
 
-                Browser.External href ->
-                    ( model, Nav.load href )
+        LinkClicked (Browser.External href) ->
+            ( model, Nav.load href )
 
         ChangedUrl url ->
             ( { model | route = fromUrl url }, Cmd.none )

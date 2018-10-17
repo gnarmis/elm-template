@@ -21,7 +21,7 @@ type alias Model =
     , route : Maybe Route
 
     -- session key that's initialized on init and then saved
-    , key : Nav.Key
+    , navSessionKey : Nav.Key
     }
 
 
@@ -54,8 +54,8 @@ fromResult result =
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
-    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, route = Routing.fromUrl url, key = key }
+init flags url navSessionKey =
+    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, route = Routing.fromUrl url, navSessionKey = navSessionKey }
     , Cmd.batch
         [ Domain.fetchAll |> Http.send DomainsCompleted
         , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
@@ -77,7 +77,7 @@ update msg model =
             ( { model | missions = fromResult result }, Cmd.none )
 
         LinkClicked (Browser.Internal url) ->
-            ( model, Nav.pushUrl model.key (Url.toString url) )
+            ( model, Nav.pushUrl model.navSessionKey (Url.toString url) )
 
         LinkClicked (Browser.External href) ->
             ( model, Nav.load href )

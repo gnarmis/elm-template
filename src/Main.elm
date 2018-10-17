@@ -156,6 +156,11 @@ renderMissionUpdateForm mission =
             [ text "Active?"
             , input [ type_ "checkbox", checked mission.active, onCheck (MissionActiveCheckboxChecked mission) ] []
             ]
+        , p []
+            [ text "Help Text: "
+            , input [ type_ "text", Maybe.withDefault "" mission.helpText |> value ] []]
+        , p []
+            [ input [ type_ "submit" ] [ text "save" ] ]
         ]
 
 

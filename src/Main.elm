@@ -26,6 +26,7 @@ type alias Model =
     -- session key that's initialized on init and then saved
     , navSessionKey : Nav.Key
     , errors : List Http.Error
+    , notification : Maybe String
     }
 
 
@@ -63,7 +64,7 @@ fromResult result =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url navSessionKey =
-    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, missionForm = Nothing, route = Routing.fromUrl url, navSessionKey = navSessionKey, errors = [] }
+    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, missionForm = Nothing, route = Routing.fromUrl url, navSessionKey = navSessionKey, errors = [], notification = Nothing }
     , Cmd.batch
         [ Domain.fetchAll |> HttpBuilder.send DomainsCompleted
         , GradeLevel.fetchAll |> HttpBuilder.send GradeLevelsCompleted
@@ -108,7 +109,7 @@ update msg model =
 
                 Success missions ->
                     -- TODO: resolve uniques
-                    ( { model | missionForm = Nothing, missions = Success (mission :: missions) }, Cmd.none )
+                    ( { model | missionForm = Nothing, missions = Success (mission :: missions), notification = Just "Mission saved!" }, Cmd.none )
 
         SubmitMission ->
             ( model
@@ -135,22 +136,24 @@ update msg model =
 view : Model -> Browser.Document Msg
 view model =
     { title = "Test App"
-    , body = renderRoute model
+    , body =
+        [ h1 [] [ text (model.notification |> Maybe.withDefault "") ]
+        , renderRoute model
+        ]
     }
 
 
-renderRoute : Model -> List (Html Msg)
+renderRoute : Model -> Html Msg
 renderRoute model =
     case model.route of
         Just CurriculumRoute ->
-            [ renderCurriculum model
-            ]
+            renderCurriculum model
 
         Just (MissionRoute missionId) ->
-            [ renderMission model missionId ]
+            renderMission model missionId
 
         Nothing ->
-            [ h2 [] [ text "Error!, no route found" ] ]
+            h2 [] [ text "Error!, no route found" ]
 
 
 renderMission : Model -> MissionId -> Html Msg

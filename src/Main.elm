@@ -7,6 +7,7 @@ import Domain exposing (Domain)
 import GradeLevel exposing (GradeLevel)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Http
 import Json.Decode as Decode
 import Mission exposing (Mission, MissionId, unwrapId)
@@ -41,6 +42,7 @@ type Msg
     | DomainsCompleted (Result Http.Error (List Domain))
     | GradeLevelsCompleted (Result Http.Error (List GradeLevel))
     | MissionsCompleted (Result Http.Error (List Mission))
+    | MissionActiveCheckboxChecked Bool
 
 
 fromResult : Result e a -> RemoteData e a
@@ -76,6 +78,9 @@ update msg model =
         MissionsCompleted result ->
             ( { model | missions = fromResult result }, Cmd.none )
 
+        MissionActiveCheckboxChecked bool ->
+            ( model, Cmd.none )
+
         LinkClicked (Browser.Internal url) ->
             ( model, Nav.pushUrl model.navSessionKey (Url.toString url) )
 
@@ -93,7 +98,7 @@ view model =
     }
 
 
-renderRoute : Model -> List (Html msg)
+renderRoute : Model -> List (Html Msg)
 renderRoute model =
     case model.route of
         Just CurriculumRoute ->
@@ -107,7 +112,7 @@ renderRoute model =
             [ h2 [] [ text "Error!, no route found" ] ]
 
 
-renderMission : Model -> MissionId -> Html msg
+renderMission : Model -> MissionId -> Html Msg
 renderMission model missionId =
     let
         findMission missions =
@@ -128,19 +133,20 @@ renderMission model missionId =
         Success missions ->
             case findMission missions of
                 Just aMission ->
-                    div [] (renderMissionUpdateForm aMission)
+                    div [] [renderMissionUpdateForm aMission]
 
                 Nothing ->
                     div [] [ text "Mission missing!" ]
 
 
 renderMissionUpdateForm mission =
-    [ p [] [ text "Mission ID", Mission.unwrapId mission.id |> String.fromInt |> text ]
-    , p []
-        [ text "Active?"
-        , input [ type_ "checkbox", checked mission.active ] []
+    Html.form []
+        [ p [] [ text "Mission ID", Mission.unwrapId mission.id |> String.fromInt |> text ]
+        , p []
+            [ text "Active?"
+            , input [ type_ "checkbox", checked mission.active, onCheck MissionActiveCheckboxChecked ] []
+            ]
         ]
-    ]
 
 
 renderCurriculum : Model -> Html msg

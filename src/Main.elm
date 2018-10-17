@@ -20,6 +20,7 @@ type alias Model =
     { domains : RemoteData Http.Error (List Domain)
     , gradeLevels : RemoteData Http.Error (List GradeLevel)
     , missions : RemoteData Http.Error (List Mission)
+    , missionForm : Maybe Mission
     , route : Maybe Route
 
     -- session key that's initialized on init and then saved
@@ -45,7 +46,9 @@ type Msg
     | GradeLevelsCompleted (Result Http.Error (List GradeLevel))
     | MissionsCompleted (Result Http.Error (List Mission))
     | MissionActiveCheckboxChecked Mission Bool
+    | MissionHelpTextEntered Mission String
     | MissionUpdated (Result Http.Error Mission)
+    | SubmitMission
 
 
 fromResult : Result e a -> RemoteData e a
@@ -60,7 +63,7 @@ fromResult result =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url navSessionKey =
-    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, route = Routing.fromUrl url, navSessionKey = navSessionKey, errors = [] }
+    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, missionForm = Nothing, route = Routing.fromUrl url, navSessionKey = navSessionKey, errors = [] }
     , Cmd.batch
         [ Domain.fetchAll |> HttpBuilder.send DomainsCompleted
         , GradeLevel.fetchAll |> HttpBuilder.send GradeLevelsCompleted
@@ -82,7 +85,10 @@ update msg model =
             ( { model | missions = fromResult result }, Cmd.none )
 
         MissionActiveCheckboxChecked mission bool ->
-            ( model, Mission.updateMission { mission | active = bool } |> HttpBuilder.send MissionUpdated )
+            ( { model | missionForm = Just { mission | active = bool } }, Cmd.none )
+
+        MissionHelpTextEntered mission helpText ->
+            ( { model | missionForm = Just { mission | helpText = Just helpText } }, Cmd.none )
 
         -- if we were to full-refresh Missions list in model, we could skip the need for MissionUpdated-like message by instead using Tasks
         MissionUpdated (Err result) ->
@@ -90,6 +96,18 @@ update msg model =
 
         MissionUpdated (Ok value) ->
             ( model, Mission.fetchAll |> HttpBuilder.send MissionsCompleted )
+
+        SubmitMission ->
+            ( model
+            , case model.missionForm of
+                Just mission ->
+                    mission
+                        |> Mission.updateMission
+                        |> HttpBuilder.send MissionUpdated
+
+                Nothing ->
+                    Cmd.none
+            )
 
         LinkClicked (Browser.Internal url) ->
             ( model, Nav.pushUrl model.navSessionKey (Url.toString url) )
@@ -126,9 +144,13 @@ renderMission : Model -> MissionId -> Html Msg
 renderMission model missionId =
     let
         findMission missions =
-            missions
-                |> List.filter (\m -> m.id == missionId)
-                |> List.head
+            case model.missionForm of
+                Just mission ->
+                    Just mission
+                Nothing ->
+                    missions
+                        |> List.filter (\m -> m.id == missionId)
+                        |> List.head
     in
     case model.missions of
         NotAsked ->
@@ -150,7 +172,7 @@ renderMission model missionId =
 
 
 renderMissionUpdateForm mission =
-    Html.form []
+    Html.form [ onSubmit SubmitMission ]
         [ p [] [ text "Mission ID", Mission.unwrapId mission.id |> String.fromInt |> text ]
         , p []
             [ text "Active?"
@@ -158,7 +180,11 @@ renderMissionUpdateForm mission =
             ]
         , p []
             [ text "Help Text: "
-            , input [ type_ "text", Maybe.withDefault "" mission.helpText |> value ] []]
+            , input [
+                type_ "text"
+                , value (Maybe.withDefault "" mission.helpText)
+                ,  onInput (MissionHelpTextEntered mission)] []
+            ]
         , p []
             [ input [ type_ "submit" ] [ text "save" ] ]
         ]

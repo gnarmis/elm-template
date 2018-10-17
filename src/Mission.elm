@@ -5,6 +5,7 @@ import GradeLevel exposing (GradeLevelId(..))
 import HttpBuilder
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Json.Encode.Extra as EncodeExtra
 
 
 type MissionId
@@ -37,7 +38,8 @@ encoder : Mission -> Encode.Value
 encoder mission =
     Encode.object
         [("id", Encode.int (unwrapId mission.id))
-        , ("active", Encode.bool mission.active)]
+        , ("active", Encode.bool mission.active)
+        , ("help_text", EncodeExtra.maybe Encode.string mission.helpText )]
 
 unwrapId : MissionId -> Int
 unwrapId (MissionId id) =

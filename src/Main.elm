@@ -24,6 +24,7 @@ type alias Model =
 
     -- session key that's initialized on init and then saved
     , navSessionKey : Nav.Key
+    , errors : List Http.Error
     }
 
 
@@ -59,7 +60,7 @@ fromResult result =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url navSessionKey =
-    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, route = Routing.fromUrl url, navSessionKey = navSessionKey }
+    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, route = Routing.fromUrl url, navSessionKey = navSessionKey, errors = [] }
     , Cmd.batch
         [ Domain.fetchAll |> HttpBuilder.send DomainsCompleted
         , GradeLevel.fetchAll |> HttpBuilder.send GradeLevelsCompleted
@@ -85,7 +86,7 @@ update msg model =
 
         -- if we were to full-refresh Missions list in model, we could skip the need for MissionUpdated-like message by instead using Tasks
         MissionUpdated (Err result) ->
-            ( model, Cmd.none )
+            ( { model | errors = result :: model.errors }, Cmd.none )
 
         MissionUpdated (Ok value) ->
             ( model, Mission.fetchAll |> HttpBuilder.send MissionsCompleted )

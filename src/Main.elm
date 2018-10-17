@@ -6,6 +6,7 @@ import Debug
 import Domain exposing (Domain)
 import GradeLevel exposing (GradeLevel)
 import Html exposing (..)
+import HttpBuilder
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
@@ -59,9 +60,9 @@ init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url navSessionKey =
     ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, route = Routing.fromUrl url, navSessionKey = navSessionKey }
     , Cmd.batch
-        [ Domain.fetchAll |> Http.send DomainsCompleted
-        , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
-        , Mission.fetchAll |> Http.send MissionsCompleted
+        [ Domain.fetchAll |> HttpBuilder.send DomainsCompleted
+        , GradeLevel.fetchAll |> HttpBuilder.send GradeLevelsCompleted
+        , Mission.fetchAll |> HttpBuilder.send MissionsCompleted
         ]
     )
 

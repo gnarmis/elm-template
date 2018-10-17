@@ -1,6 +1,6 @@
 module GradeLevel exposing (GradeLevel, GradeLevelId(..), decoder, fetchAll, unwrapGradeLevelId)
 
-import Http
+import HttpBuilder
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -29,4 +29,5 @@ unwrapGradeLevelId (GradeLevelId id) =
 
 
 fetchAll =
-    Http.get "//localhost:3000/grade_levels" (Decode.list decoder)
+    HttpBuilder.get "//localhost:3000/grade_levels"
+        |> HttpBuilder.withExpectJson (Decode.list decoder)

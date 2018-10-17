@@ -128,10 +128,19 @@ renderMission model missionId =
         Success missions ->
             case findMission missions of
                 Just aMission ->
-                    div [] [ text (Debug.toString aMission) ]
+                    div [] (renderMissionUpdateForm aMission)
 
                 Nothing ->
                     div [] [ text "Mission missing!" ]
+
+
+renderMissionUpdateForm mission =
+    [ p [] [ text "Mission ID", Mission.unwrapId mission.id |> String.fromInt |> text ]
+    , p []
+        [ text "Active?"
+        , input [ type_ "checkbox", checked mission.active ] []
+        ]
+    ]
 
 
 renderCurriculum : Model -> Html msg

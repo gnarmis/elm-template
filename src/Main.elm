@@ -15,12 +15,19 @@ import Url
 
 
 type alias Model =
-    { domains : List Domain
-    , gradeLevels : List GradeLevel
-    , missions : List Mission
+    { domains : RemoteData Http.Error (List Domain)
+    , gradeLevels : RemoteData Http.Error (List GradeLevel)
+    , missions : RemoteData Http.Error (List Mission)
     , route : Maybe Route
     , key : Nav.Key
     }
+
+
+type RemoteData e a
+    = NotAsked
+    | Loading
+    | Failure e
+    | Success a
 
 
 type Msg
@@ -31,9 +38,19 @@ type Msg
     | MissionsCompleted (Result Http.Error (List Mission))
 
 
+fromResult : Result e a -> RemoteData e a
+fromResult result =
+    case result of
+        Ok value ->
+            Success value
+
+        Err err ->
+            Failure err
+
+
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { gradeLevels = [], domains = [], missions = [], route = Routing.fromUrl url, key = key }
+    ( { gradeLevels = NotAsked, domains = NotAsked, missions = NotAsked, route = Routing.fromUrl url, key = key }
     , Cmd.batch
         [ Domain.fetchAll |> Http.send DomainsCompleted
         , GradeLevel.fetchAll |> Http.send GradeLevelsCompleted
@@ -42,31 +59,17 @@ init flags url key =
     )
 
 
-dataFromResultOrDefault : Result Http.Error data -> data -> data
-dataFromResultOrDefault result default =
-    case result of
-        Ok data ->
-            data
-
-        Err err ->
-            let
-                _ =
-                    Debug.log "Domains foobar" err
-            in
-            default
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DomainsCompleted result ->
-            ( { model | domains = dataFromResultOrDefault result model.domains }, Cmd.none )
+            ( { model | domains = fromResult result }, Cmd.none )
 
         GradeLevelsCompleted result ->
-            ( { model | gradeLevels = dataFromResultOrDefault result model.gradeLevels }, Cmd.none )
+            ( { model | gradeLevels = fromResult result }, Cmd.none )
 
         MissionsCompleted result ->
-            ( { model | missions = dataFromResultOrDefault result model.missions }, Cmd.none )
+            ( { model | missions = fromResult result }, Cmd.none )
 
         LinkClicked (Browser.Internal url) ->
             ( model, Nav.pushUrl model.key (Url.toString url) )
@@ -102,23 +105,34 @@ renderRoute model =
 renderMission : Model -> MissionId -> Html msg
 renderMission model missionId =
     let
-        mission =
-            model.missions
+        findMission missions =
+            missions
                 |> List.filter (\m -> m.id == missionId)
                 |> List.head
     in
-    case mission of
-        Just aMission ->
-            div [] [ text (Debug.toString aMission) ]
+    case model.missions of
+        NotAsked ->
+            text "YOU FAIL"
 
-        Nothing ->
-            div [] [ text "Mission missing!" ]
+        Loading ->
+            text "Loading..."
+
+        Failure err ->
+            text (Debug.toString err)
+
+        Success missions ->
+            case findMission missions of
+                Just aMission ->
+                    div [] [ text (Debug.toString aMission) ]
+
+                Nothing ->
+                    div [] [ text "Mission missing!" ]
 
 
 renderCurriculum : Model -> Html msg
-renderCurriculum { domains, gradeLevels, missions } =
+renderCurriculum model =
     let
-        renderHeader =
+        renderHeader gradeLevels =
             tr []
                 (th [] []
                     :: (gradeLevels
@@ -129,24 +143,27 @@ renderCurriculum { domains, gradeLevels, missions } =
                        )
                 )
 
-        renderBody =
+        renderBody domains gradeLevels missions =
             domains
                 |> List.map
                     (\domain ->
                         tr []
                             (th [] [ text domain.code ]
-                                :: (gradeLevels |> List.map (renderCell domain))
+                                :: (gradeLevels |> List.map (\gradeLevel -> renderCell domain gradeLevel missions))
                             )
                     )
 
-        renderCell : Domain -> GradeLevel -> Html msg
-        renderCell domain gradeLevel =
+        renderCell : Domain -> GradeLevel -> List Mission -> Html msg
+        renderCell domain gradeLevel missions =
             let
-                cellMissions =
-                    missions |> List.filter (\m -> m.domainId == domain.id && m.gradeLevelId == gradeLevel.id)
+                match mission =
+                    mission.domainId == domain.id && mission.gradeLevelId == gradeLevel.id
             in
             td []
-                (cellMissions |> List.map renderMissionCell)
+                (missions
+                    |> List.filter match
+                    |> List.map renderMissionCell
+                )
 
         renderMissionCell : Mission -> Html msg
         renderMissionCell mission =
@@ -159,7 +176,13 @@ renderCurriculum { domains, gradeLevels, missions } =
                     )
                 ]
     in
-    table [] (renderHeader :: renderBody)
+    case ( model.missions, model.gradeLevels, model.domains ) of
+        ( Success missions, Success gradeLevels, Success domains ) ->
+            table [] (renderHeader gradeLevels :: renderBody domains gradeLevels missions)
+
+        _ ->
+            -- TODO: handle error vs loading
+            text "Data missing!"
 
 
 subscriptions : Model -> Sub Msg

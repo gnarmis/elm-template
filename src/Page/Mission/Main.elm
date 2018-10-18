@@ -1,56 +1,106 @@
 module Page.Mission.Main exposing (view)
 
-import Model exposing (Model)
+import Data.Mission as Mission exposing (Mission)
 import Data.MissionId as MissionId exposing (MissionId)
+import Errored exposing (PageLoadError)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Update exposing (Msg(..))
-import Route exposing (Route(..))
+import Http
+import HttpBuilder
 import RemoteData exposing (WebData)
+import Route exposing (Route(..))
+import Task exposing (Task)
+import Update exposing (Msg(..))
 
-view : Model -> MissionId -> Html Msg
-view model missionId =
+
+type alias Model =
+    { mission : Mission
+    }
+
+
+init : MissionId -> Task PageLoadError Model
+init missionId =
     let
-        findMission missions =
-            missions
-                |> List.filter (\m -> m.id == missionId)
-                |> List.head
+        loadMission =
+            Mission.show missionId
+                |> HttpBuilder.toRequest
+                |> Http.toTask
+
+        handleLoadError _ =
+            Errored.pageLoadError "Mission could not be loaded."
     in
-    case model.missions of
-        RemoteData.NotAsked ->
-            text "YOU FAIL"
+    Task.map Model loadMission
+        |> Task.mapError handleLoadError
 
-        RemoteData.Loading ->
-            text "Loading..."
 
-        RemoteData.Failure err ->
-            text (Debug.toString err)
+view : Model -> Html Msg
+view { mission } =
+    div []
+        [ div []
+            [ h1 []
+                [ text "Mission" ]
+            , p []
+                [ text <| "mission_id: " ++ MissionId.toString mission.id ]
+            , p []
+                [ text <| "help_text: " ++ mission.helpText ]
+            , p []
+                [ text <| "active: " ++ Debug.toString mission.active ]
+            ]
+        -- , Html.form [ onSubmit SubmitMissionUpdateForm ]
+        --     [ input [ name "id", type_ "hidden", value <| MissionId.toString mission.id ]
+        --         []
+        --     , textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
+        --         [ text mission.helpText ]
+        --     , input [ name "active", type_ "checkbox", value "true", checked mission.active, onCheck SetMissionUpdateFormActive ]
+        --         []
+        --     , button [] [ text "submit" ]
+        --     ]
+        ]
 
-        RemoteData.Success missions ->
-            case findMission missions of
-                Just mission ->
-                    div []
-                        [ div []
-                            [ h1 []
-                                [ text "Mission" ]
-                            , p []
-                                [ text <| "mission_id: " ++ MissionId.toString mission.id ]
-                            , p []
-                                [ text <| "help_text: " ++ mission.helpText ]
-                            , p []
-                                [ text <| "active: " ++ Debug.toString mission.active ]
-                            ]
-                        , Html.form [ onSubmit SubmitMissionUpdateForm ]
-                            [ input [ name "id", type_ "hidden", value <| MissionId.toString mission.id ]
-                                []
-                            , textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
-                                [ text mission.helpText ]
-                            , input [ name "active", type_ "checkbox", value "true", checked mission.active, onCheck SetMissionUpdateFormActive ]
-                                []
-                            , button [] [ text "submit" ]
-                            ]
-                        ]
 
-                Nothing ->
-                    div [] [ text "Mission missing!" ]
+-- oldview : Model -> MissionId -> Html Msg
+-- oldview model missionId =
+--     let
+--         findMission missions =
+--             missions
+--                 |> List.filter (\m -> m.id == missionId)
+--                 |> List.head
+--     in
+--     case model.mission of
+--         RemoteData.NotAsked ->
+--             text "YOU FAIL"
+
+--         RemoteData.Loading ->
+--             text "Loading..."
+
+--         RemoteData.Failure err ->
+--             text (Debug.toString err)
+
+--         RemoteData.Success missions ->
+--             case findMission missions of
+--                 Just mission ->
+--                     div []
+--                         [ div []
+--                             [ h1 []
+--                                 [ text "Mission" ]
+--                             , p []
+--                                 [ text <| "mission_id: " ++ MissionId.toString mission.id ]
+--                             , p []
+--                                 [ text <| "help_text: " ++ mission.helpText ]
+--                             , p []
+--                                 [ text <| "active: " ++ Debug.toString mission.active ]
+--                             ]
+--                         , Html.form [ onSubmit SubmitMissionUpdateForm ]
+--                             [ input [ name "id", type_ "hidden", value <| MissionId.toString mission.id ]
+--                                 []
+--                             , textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
+--                                 [ text mission.helpText ]
+--                             , input [ name "active", type_ "checkbox", value "true", checked mission.active, onCheck SetMissionUpdateFormActive ]
+--                                 []
+--                             , button [] [ text "submit" ]
+--                             ]
+--                         ]
+
+--                 Nothing ->
+--                     div [] [ text "Mission missing!" ]

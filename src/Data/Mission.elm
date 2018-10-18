@@ -1,4 +1,4 @@
-module Data.Mission exposing (Mission, decoder, index)
+module Data.Mission exposing (Mission, decoder, index, show)
 
 import Data.DomainId as DomainId exposing (DomainId(..))
 import Data.GradeLevelId as GradeLevelId exposing (GradeLevelId(..))

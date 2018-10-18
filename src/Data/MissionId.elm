@@ -1,4 +1,4 @@
-module Data.MissionId exposing (MissionId(..), decoder, encode, toString, urlParser)
+module Data.MissionId exposing (MissionId(..), decoder, encode, fromString, toString, urlParser)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode exposing (Value)
@@ -39,3 +39,8 @@ encode (MissionId missionId) =
 toString : MissionId -> String
 toString (MissionId int) =
     String.fromInt int
+
+
+fromString : String -> MissionId
+fromString id =
+    String.toInt id |> Maybe.withDefault 0 |> MissionId

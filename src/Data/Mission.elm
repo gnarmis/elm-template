@@ -1,4 +1,4 @@
-module Data.Mission exposing (Mission, decoder, index)
+module Data.Mission exposing (Mission, decoder, index, show, update)
 
 import Data.DomainId as DomainId exposing (DomainId(..))
 import Data.GradeLevelId as GradeLevelId exposing (GradeLevelId(..))
@@ -39,4 +39,10 @@ index =
 
 show id =
     HttpBuilder.get ("http://localhost:3000/missions?id=" ++ MissionId.toString id)
+        |> HttpBuilder.withExpectJson decoder
+
+
+update id encodedForm =
+    HttpBuilder.patch ("//localhost:3000/missions/" ++ MissionId.toString id)
+        |> HttpBuilder.withJsonBody encodedForm
         |> HttpBuilder.withExpectJson decoder

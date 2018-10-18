@@ -1,4 +1,4 @@
-module Routing exposing (Route(..), fromUrl, link)
+module Route exposing (Route(..), fromUrl, link)
 
 import Data.MissionId as MissionId exposing (MissionId)
 import Html exposing (Html)

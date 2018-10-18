@@ -3,13 +3,9 @@ module Main exposing (init)
 import Browser
 import Browser.Navigation as Nav
 import Data.Domain as Domain exposing (Domain)
-import Data.DomainId as DomainId exposing (DomainId(..))
 import Data.GradeLevel as GradeLevel exposing (GradeLevel)
-import Data.GradeLevelId as GradeLevelId exposing (GradeLevelId(..))
 import Data.Mission as Mission exposing (Mission)
-import Data.MissionId as MissionId exposing (MissionId(..))
 import HttpBuilder
-import Json.Decode as Decode
 import Model exposing (Model)
 import RemoteData exposing (WebData)
 import Route exposing (Route(..))
@@ -29,19 +25,9 @@ init flags url key =
     )
 
 
-
--- ( { model | active = thing }, Cmd.none )
--- Let's discuss this
--- It time, provide an example
-
-
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.none
-
-
-
--- MAIN
 
 
 main : Program () Model Msg

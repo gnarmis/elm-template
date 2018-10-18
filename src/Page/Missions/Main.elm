@@ -1,12 +1,13 @@
-module Page.Missions.Main exposing (..)
+module Page.Missions.Main exposing (view)
 
-import Model exposing (Model)
-import Html exposing (..)
-import Data.GradeLevel as GradeLevel exposing (GradeLevel)
 import Data.Domain as Domain exposing (Domain)
+import Data.GradeLevel as GradeLevel exposing (GradeLevel)
 import Data.Mission as Mission exposing (Mission)
-import Routing exposing (Route(..))
+import Html exposing (..)
+import Model exposing (Model)
 import RemoteData exposing (WebData)
+import Routing exposing (Route(..))
+
 
 view : Model -> Html msg
 view model =

@@ -1,11 +1,13 @@
-module Model exposing (..)
+module Model exposing (Model)
 
-import RemoteData exposing (WebData)
-import Data.GradeLevel as GradeLevel exposing (GradeLevel)
-import Data.Domain as Domain exposing (Domain)
 import Browser.Navigation as Nav
+import Data.Domain as Domain exposing (Domain)
+import Data.GradeLevel as GradeLevel exposing (GradeLevel)
 import Data.Mission as Mission exposing (Mission)
+import Page.Mission.Model exposing (MissionFormModel)
+import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
+
 
 type alias Model =
     { domains : WebData (List Domain)
@@ -14,12 +16,4 @@ type alias Model =
     , route : Maybe Route
     , key : Nav.Key
     , missionUpdateForm : MissionFormModel
-    }
-
-
-type alias MissionFormModel =
-    { id : String
-    , helpText : String
-    , active : Bool
-    , errors : List String
     }

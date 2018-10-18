@@ -1,15 +1,16 @@
 module Update exposing (Msg(..), update)
 
 import Browser
+import Browser.Navigation as Nav
 import Data.Domain as Domain exposing (Domain)
 import Data.GradeLevel as GradeLevel exposing (GradeLevel)
 import Data.Mission as Mission exposing (Mission)
 import Http
 import Model exposing (Model)
-import Url
+import Page.Mission.Update
 import RemoteData exposing (WebData)
 import Routing
-import Browser.Navigation as Nav
+import Url
 
 
 type Msg
@@ -18,9 +19,7 @@ type Msg
     | DomainsLoadingComplete (Result Http.Error (List Domain))
     | GradeLevelsLoadingComplete (Result Http.Error (List GradeLevel))
     | MissionsLoadingComplete (Result Http.Error (List Mission))
-    | SubmitMissionUpdateForm
-    | SetMissionUpdateFormHelpText String
-    | SetMissionUpdateFormActive Bool
+    | PageMissionUpdates Page.Mission.Update.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -44,18 +43,5 @@ update msg model =
         ChangedUrl url ->
             ( { model | route = Routing.fromUrl url }, Cmd.none )
 
-        SubmitMissionUpdateForm ->
-            ( model, Cmd.none )
-
-        SetMissionUpdateFormHelpText _ ->
-            ( model, Cmd.none )
-
-        SetMissionUpdateFormActive isActive ->
-            let
-                form =
-                    model.missionUpdateForm
-
-                updatedForm =
-                    { form | active = isActive }
-            in
-            ( { model | missionUpdateForm = updatedForm }, Cmd.none )
+        PageMissionUpdates message ->
+            Page.Mission.Update.update message model

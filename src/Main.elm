@@ -3,11 +3,8 @@ module Main exposing (init)
 import Browser
 import Browser.Navigation as Nav
 import Data.Domain as Domain exposing (Domain)
-import Data.DomainId as DomainId exposing (DomainId(..))
 import Data.GradeLevel as GradeLevel exposing (GradeLevel)
-import Data.GradeLevelId as GradeLevelId exposing (GradeLevelId(..))
 import Data.Mission as Mission exposing (Mission)
-import Data.MissionId as MissionId exposing (MissionId(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -16,6 +13,7 @@ import HttpBuilder exposing (..)
 import Json.Decode as Decode
 import Model exposing (Model)
 import Page.Mission.Main
+import Page.Mission.Model exposing (emptyMissionUpdateForm)
 import Page.Missions.Main
 import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
@@ -31,22 +29,15 @@ init flags url key =
       , missions = RemoteData.NotAsked
       , route = Routing.fromUrl url
       , key = key
-      , missionUpdateForm = emptyMissionUpdateForm
+      , missionUpdateForm = emptyMissionUpdateForm -- TODO: move
       }
     , Cmd.batch
+        -- TODO: if time, what do we do here instead?
         [ Domain.index |> HttpBuilder.send DomainsLoadingComplete
         , GradeLevel.index |> HttpBuilder.send GradeLevelsLoadingComplete
         , Mission.index |> HttpBuilder.send MissionsLoadingComplete
         ]
     )
-
-
-emptyMissionUpdateForm =
-    { id = ""
-    , helpText = ""
-    , active = False
-    , errors = []
-    }
 
 
 subscriptions : Model -> Sub Msg

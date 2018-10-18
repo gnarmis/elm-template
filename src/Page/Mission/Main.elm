@@ -10,10 +10,10 @@ import Html.Events exposing (..)
 import Model exposing (Model)
 import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
-import Update exposing (Msg(..))
+import Page.Mission.Update exposing (Msg(..))
 
 
-view : Model -> MissionId -> Html Msg
+view : Model -> MissionId -> Html Page.Mission.Update.Msg
 view model missionId =
     let
         findMission missions =

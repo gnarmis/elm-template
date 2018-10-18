@@ -6,7 +6,7 @@ import Model exposing (Model)
 import Page.Mission.Main exposing (..)
 import Page.Missions.Main exposing (..)
 import Routing exposing (Route(..))
-import Update exposing (Msg)
+import Update exposing (Msg(..))
 
 
 view : Model -> Browser.Document Msg
@@ -16,12 +16,7 @@ view model =
     }
 
 
-
--- Let's discuss this
--- It time, provide an example
-
-
-renderRoute : Model -> List (Html Msg)
+renderRoute : Model -> List (Html Update.Msg)
 renderRoute model =
     case model.route of
         Just CurriculumRoute ->
@@ -29,7 +24,7 @@ renderRoute model =
             ]
 
         Just (MissionRoute missionId) ->
-            [ Page.Mission.Main.view model missionId ]
+            [ Page.Mission.Main.view model missionId |> Html.map PageMissionUpdates ]
 
         Nothing ->
             [ h2 [] [ text "Error!, no route found" ] ]

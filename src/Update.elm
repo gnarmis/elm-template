@@ -46,10 +46,10 @@ update msg model =
 
         PageMissionUpdates message ->
             let
-                ( updatedModel, pageCmd ) =
-                    Page.Mission.Update.update message model
+                ( updatedMissionPageModel, pageCmd ) =
+                    Page.Mission.Update.update message model.missionPageModel
             in
-            ( updatedModel, pageCmd |> Cmd.map PageMissionUpdates )
+            ( { model | missionPageModel = updatedMissionPageModel }, pageCmd |> Cmd.map PageMissionUpdates )
 
 
 -- name is confusing

@@ -1,4 +1,4 @@
-module Page.Mission.Main exposing (view, init)
+module Page.Mission.Main exposing (init, view)
 
 import Data.Domain as Domain exposing (Domain)
 import Data.GradeLevel as GradeLevel exposing (GradeLevel)
@@ -8,7 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import HttpBuilder
-import Model exposing (Model)
+import Page.Mission.Model exposing (Model)
 import Page.Mission.Update exposing (Msg(..))
 import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
@@ -21,12 +21,7 @@ init missionId =
 
 
 view : Model -> MissionId -> Html Page.Mission.Update.Msg
-view ({ missionUpdateForm } as model) missionId =
-    let
-        mission =
-            missionUpdateForm.mission
-    in
-
+view ({ missionUpdateForm, mission } as model) missionId =
     -- let
     --     findMission missions =
     --         missions
@@ -36,35 +31,34 @@ view ({ missionUpdateForm } as model) missionId =
     -- case model.missions of
     --     RemoteData.NotAsked ->
     --         text "YOU FAIL"
-
     --     RemoteData.Loading ->
     --         text "Loading..."
-
     --     RemoteData.Failure err ->
     --         text (Debug.toString err)
-
     --     RemoteData.Success missions ->
     --         case findMission missions of
-                -- Just mission ->
-            div []
-                [ div []
-                    [ h1 []
-                        [ text "Mission" ]
-                    , p []
-                        [ text <| "mission_id: " ++ MissionId.toString mission.id ]
-                    , p []
-                        [ text <| "help_text: " ++ mission.helpText ]
-                    , p []
-                        [ text <| "active: " ++ Debug.toString mission.active ]
-                    ]
-                , Html.form [ onSubmit SubmitMissionUpdateForm ]
-                    [ textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
-                        [ text missionUpdateForm.helpText ]
-                    , input [ name "active", type_ "checkbox", value "true", checked missionUpdateForm.active, onCheck SetMissionUpdateFormActive ]
-                        []
-                    , button [] [ text "submit" ]
-                    ]
-                ]
+    -- Just mission ->
+    div []
+        [ div []
+            [ h1 []
+                [ text "Mission" ]
+            , p []
+                [ text <| "mission_id: " ++ MissionId.toString mission.id ]
+            , p []
+                [ text <| "help_text: " ++ mission.helpText ]
+            , p []
+                [ text <| "active: " ++ Debug.toString mission.active ]
+            ]
+        , Html.form [ onSubmit SubmitMissionUpdateForm ]
+            [ textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
+                [ text missionUpdateForm.helpText ]
+            , input [ name "active", type_ "checkbox", value "true", checked missionUpdateForm.active, onCheck SetMissionUpdateFormActive ]
+                []
+            , button [] [ text "submit" ]
+            ]
+        ]
 
-                -- Nothing ->
-                --     div [] [ text "Mission missing!" ]
+
+
+-- Nothing ->
+--     div [] [ text "Mission missing!" ]

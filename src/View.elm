@@ -24,7 +24,7 @@ renderRoute model =
             ]
 
         Just (MissionRoute missionId) ->
-            [ Page.Mission.Main.view model missionId |> Html.map PageMissionUpdates ]
+            [ Page.Mission.Main.view model.missionPageModel missionId |> Html.map PageMissionUpdates ]
 
         Nothing ->
             [ h2 [] [ text "Error!, no route found" ] ]

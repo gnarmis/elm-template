@@ -43,7 +43,7 @@ init flags url key =
     , missions = RemoteData.NotAsked
     , route = Routing.fromUrl url
     , key = key
-    , missionUpdateForm = initMissionUpdateForm dummyMission
+    , missionPageModel = Page.Mission.Model.initModel dummyMission
     }
         |> changeRouteTo (Routing.fromUrl url)
 

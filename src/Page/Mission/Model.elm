@@ -1,13 +1,18 @@
-module Page.Mission.Model exposing (MissionUpdateForm, formEncode, initMissionUpdateForm)
+module Page.Mission.Model exposing (Model, MissionUpdateForm, formEncode, initMissionUpdateForm, initModel)
 
 import Data.Mission exposing (Mission)
 import Data.MissionId exposing (MissionId)
 import Json.Encode as Encode
 
 
-type alias MissionUpdateForm =
+type alias Model =
     { mission : Mission
-    , helpText : String
+    , missionUpdateForm : MissionUpdateForm
+    , errors : List String
+    }
+
+type alias MissionUpdateForm =
+    { helpText : String
     , active : Bool
     , errors : List String
     }
@@ -15,9 +20,15 @@ type alias MissionUpdateForm =
 
 initMissionUpdateForm : Mission -> MissionUpdateForm
 initMissionUpdateForm mission =
-    { mission = mission
-    , helpText = mission.helpText
+    { helpText = mission.helpText
     , active = mission.active
+    , errors = []
+    }
+
+initModel : Mission -> Model
+initModel mission =
+    { mission = mission
+    , missionUpdateForm = initMissionUpdateForm mission
     , errors = []
     }
 

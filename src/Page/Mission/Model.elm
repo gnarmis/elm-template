@@ -1,27 +1,30 @@
-module Page.Mission.Model exposing (MissionFormModel, emptyMissionUpdateForm, formEncode)
+module Page.Mission.Model exposing (MissionUpdateForm, formEncode, initMissionUpdateForm)
 
+import Data.Mission exposing (Mission)
+import Data.MissionId exposing (MissionId)
 import Json.Encode as Encode
 
-type alias MissionFormModel =
-    { id : String
+
+type alias MissionUpdateForm =
+    { id : MissionId
     , helpText : String
     , active : Bool
     , errors : List String
     }
 
 
-emptyMissionUpdateForm =
-    { id = ""
-    , helpText = ""
-    , active = False
+initMissionUpdateForm : Mission -> MissionUpdateForm
+initMissionUpdateForm mission =
+    { id = mission.id
+    , helpText = mission.helpText
+    , active = mission.active
     , errors = []
     }
 
 
-formEncode : MissionFormModel -> Encode.Value
+formEncode : MissionUpdateForm -> Encode.Value
 formEncode missionForm =
     Encode.object
-        [ ( "id", Encode.string missionForm.id )
-        , ( "active", Encode.bool missionForm.active )
+        [ ( "active", Encode.bool missionForm.active )
         , ( "help_text", Encode.string missionForm.helpText )
         ]

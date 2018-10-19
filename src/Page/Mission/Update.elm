@@ -20,12 +20,8 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ missionUpdateForm } as model) =
     case msg of
         SubmitMissionUpdateForm ->
-            let
-                missionId =
-                    MissionId.fromString model.missionUpdateForm.id
-            in
             ( model
-            , Mission.update missionId (Page.Mission.Model.formEncode model.missionUpdateForm)
+            , Mission.update missionUpdateForm.id (Page.Mission.Model.formEncode model.missionUpdateForm)
                 |> HttpBuilder.send MissionUpdateComplete
             )
 

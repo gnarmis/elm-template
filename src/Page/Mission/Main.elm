@@ -8,13 +8,13 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Model exposing (Model)
+import Page.Mission.Update exposing (Msg(..))
 import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
-import Page.Mission.Update exposing (Msg(..))
 
 
 view : Model -> MissionId -> Html Page.Mission.Update.Msg
-view model missionId =
+view ({ missionUpdateForm } as model) missionId =
     let
         findMission missions =
             missions
@@ -46,11 +46,11 @@ view model missionId =
                                 [ text <| "active: " ++ Debug.toString mission.active ]
                             ]
                         , Html.form [ onSubmit SubmitMissionUpdateForm ]
-                            [ input [ name "id", type_ "hidden", value <| MissionId.toString mission.id ]
+                            [ input [ name "id", type_ "hidden", value <| MissionId.toString missionUpdateForm.id ]
                                 []
                             , textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
-                                [ text mission.helpText ]
-                            , input [ name "active", type_ "checkbox", value "true", checked mission.active, onCheck SetMissionUpdateFormActive ]
+                                [ text missionUpdateForm.helpText ]
+                            , input [ name "active", type_ "checkbox", value "true", checked missionUpdateForm.active, onCheck SetMissionUpdateFormActive ]
                                 []
                             , button [] [ text "submit" ]
                             ]

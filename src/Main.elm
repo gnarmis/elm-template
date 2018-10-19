@@ -3,8 +3,11 @@ module Main exposing (init)
 import Browser
 import Browser.Navigation as Nav
 import Data.Domain as Domain exposing (Domain)
+import Data.DomainId exposing (DomainId(..))
 import Data.GradeLevel as GradeLevel exposing (GradeLevel)
+import Data.GradeLevelId exposing (GradeLevelId(..))
 import Data.Mission as Mission exposing (Mission)
+import Data.MissionId exposing (MissionId(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -13,13 +16,24 @@ import HttpBuilder exposing (..)
 import Json.Decode as Decode
 import Model exposing (Model)
 import Page.Mission.Main
-import Page.Mission.Model exposing (emptyMissionUpdateForm)
+import Page.Mission.Model exposing (initMissionUpdateForm)
 import Page.Missions.Main
 import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
 import Update exposing (Msg(..), update)
 import Url
 import View exposing (view)
+
+
+dummyMission =
+    { id = MissionId 27
+    , gradeLevelId = GradeLevelId 1
+    , domainId = DomainId 1
+    , activeQuestCount = 0
+    , inactiveQuestCount = 0
+    , helpText = ""
+    , active = False
+    }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -29,7 +43,7 @@ init flags url key =
       , missions = RemoteData.NotAsked
       , route = Routing.fromUrl url
       , key = key
-      , missionUpdateForm = emptyMissionUpdateForm -- TODO: move
+      , missionUpdateForm = initMissionUpdateForm dummyMission
       }
     , Cmd.batch
         -- TODO: if time, what do we do here instead?

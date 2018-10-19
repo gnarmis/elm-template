@@ -38,7 +38,7 @@ index =
 
 
 show id =
-    HttpBuilder.get ("http://localhost:3000/missions?id=" ++ MissionId.toString id)
+    HttpBuilder.get ("http://localhost:3000/missions/" ++ MissionId.toString id)
         |> HttpBuilder.withExpectJson decoder
 
 

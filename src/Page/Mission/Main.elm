@@ -1,4 +1,4 @@
-module Page.Mission.Main exposing (view)
+module Page.Mission.Main exposing (view, init)
 
 import Data.Domain as Domain exposing (Domain)
 import Data.GradeLevel as GradeLevel exposing (GradeLevel)
@@ -7,10 +7,17 @@ import Data.MissionId as MissionId exposing (MissionId(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import HttpBuilder
 import Model exposing (Model)
 import Page.Mission.Update exposing (Msg(..))
 import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
+import Task
+
+
+init missionId =
+    Mission.show missionId
+        |> HttpBuilder.send MissionInitComplete
 
 
 view : Model -> MissionId -> Html Page.Mission.Update.Msg

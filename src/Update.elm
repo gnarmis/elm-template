@@ -8,8 +8,9 @@ import Data.Mission as Mission exposing (Mission)
 import Http
 import Model exposing (Model)
 import Page.Mission.Update
+import Page.Mission.Main
 import RemoteData exposing (WebData)
-import Routing
+import Routing exposing (Route(..))
 import Url
 
 
@@ -41,7 +42,12 @@ update msg model =
             ( model, Nav.load href )
 
         ChangedUrl url ->
-            ( { model | route = Routing.fromUrl url }, Cmd.none )
+            -- TODO: add a NotFound route!!!
+            case Maybe.withDefault CurriculumRoute <| Routing.fromUrl url of
+                CurriculumRoute ->
+                    ( { model | route = Routing.fromUrl url }, Cmd.none )
+                MissionRoute missionId ->
+                    ( { model | route = Routing.fromUrl url }, Page.Mission.Main.init missionId |> Cmd.map PageMissionUpdates )
 
         PageMissionUpdates message ->
             let

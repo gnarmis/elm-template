@@ -20,21 +20,6 @@ import Route exposing (Route(..))
 import Update exposing (..)
 
 
--- type Page
---     = PageCurriculum CurriculumPage.Model
---     | PageMission MissionPage.Model
-
-
--- type PageState
---     = Loaded Page
---     | TransitioningFrom Page
-
-
--- type alias Model =
---     { session : Session
---     , pageState : PageState
---     }
-
 
 -- Inside View.elm, we define the view for our model and set up any event handlers we need.
 

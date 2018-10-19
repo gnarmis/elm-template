@@ -1,4 +1,4 @@
-module Page.Mission.Main exposing (view)
+module Page.Mission.Main exposing (Model, Msg(..), init, update, view)
 
 import Data.Mission as Mission exposing (Mission)
 import Data.MissionId as MissionId exposing (MissionId)
@@ -11,12 +11,15 @@ import HttpBuilder
 import RemoteData exposing (WebData)
 import Route exposing (Route(..))
 import Task exposing (Task)
-import Update exposing (Msg(..))
 
 
 type alias Model =
     { mission : Mission
     }
+
+
+type Msg
+    = MissionShowLoadingComplete MissionId (Result PageLoadError Model)
 
 
 init : MissionId -> Task PageLoadError Model
@@ -34,6 +37,14 @@ init missionId =
         |> Task.mapError handleLoadError
 
 
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        MissionShowLoadingComplete missionId (Ok missionModel) ->
+            ( missionModel, Cmd.none)
+        MissionShowLoadingComplete missionId (Err value) ->
+            ( model, Cmd.none )
+
 view : Model -> Html Msg
 view { mission } =
     div []
@@ -47,6 +58,7 @@ view { mission } =
             , p []
                 [ text <| "active: " ++ Debug.toString mission.active ]
             ]
+
         -- , Html.form [ onSubmit SubmitMissionUpdateForm ]
         --     [ input [ name "id", type_ "hidden", value <| MissionId.toString mission.id ]
         --         []
@@ -57,6 +69,7 @@ view { mission } =
         --     , button [] [ text "submit" ]
         --     ]
         ]
+
 
 
 -- oldview : Model -> MissionId -> Html Msg
@@ -70,13 +83,10 @@ view { mission } =
 --     case model.mission of
 --         RemoteData.NotAsked ->
 --             text "YOU FAIL"
-
 --         RemoteData.Loading ->
 --             text "Loading..."
-
 --         RemoteData.Failure err ->
 --             text (Debug.toString err)
-
 --         RemoteData.Success missions ->
 --             case findMission missions of
 --                 Just mission ->
@@ -101,6 +111,5 @@ view { mission } =
 --                             , button [] [ text "submit" ]
 --                             ]
 --                         ]
-
 --                 Nothing ->
 --                     div [] [ text "Mission missing!" ]

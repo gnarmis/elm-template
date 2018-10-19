@@ -44,4 +44,8 @@ update msg model =
             ( { model | route = Routing.fromUrl url }, Cmd.none )
 
         PageMissionUpdates message ->
-            Page.Mission.Update.update message model
+            let
+                ( updatedModel, pageCmd ) =
+                    Page.Mission.Update.update message model
+            in
+            ( updatedModel, pageCmd |> Cmd.map PageMissionUpdates )

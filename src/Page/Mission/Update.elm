@@ -17,7 +17,7 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ missionUpdateForm } as model) =
     case msg of
         SubmitMissionUpdateForm ->
             let
@@ -29,28 +29,14 @@ update msg model =
                 |> HttpBuilder.send MissionUpdateComplete
             )
 
-        SetMissionUpdateFormHelpText _ ->
-            ( model, Cmd.none )
+        SetMissionUpdateFormHelpText text ->
+            ( { model | missionUpdateForm = { missionUpdateForm | helpText = text } }, Cmd.none )
 
         SetMissionUpdateFormActive isActive ->
-            let
-                form =
-                    model.missionUpdateForm
-
-                updatedForm =
-                    { form | active = isActive }
-            in
-            ( { model | missionUpdateForm = updatedForm }, Cmd.none )
+            ( { model | missionUpdateForm = { missionUpdateForm | active = isActive } }, Cmd.none )
 
         MissionUpdateComplete (Err err) ->
-            let
-                form =
-                    model.missionUpdateForm
-
-                updatedForm =
-                    { form | errors = Debug.toString err :: form.errors }
-            in
-            ( { model | missionUpdateForm = updatedForm }, Cmd.none )
+            ( { model | missionUpdateForm = { missionUpdateForm | errors = Debug.toString err :: missionUpdateForm.errors } }, Cmd.none )
 
         MissionUpdateComplete (Ok mission) ->
             ( model, Cmd.none )

@@ -42,7 +42,17 @@ update msg model =
             in
             ( { model | missionUpdateForm = updatedForm }, Cmd.none )
 
-        MissionUpdateComplete result ->
+        MissionUpdateComplete (Err err) ->
+            let
+                form =
+                    model.missionUpdateForm
+
+                updatedForm =
+                    { form | errors = Debug.toString err :: form.errors }
+            in
+            ( { model | missionUpdateForm = updatedForm }, Cmd.none )
+
+        MissionUpdateComplete (Ok mission) ->
             ( model, Cmd.none )
 
 

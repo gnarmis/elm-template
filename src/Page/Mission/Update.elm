@@ -22,7 +22,7 @@ update msg ({ missionUpdateForm } as model) =
     case msg of
         SubmitMissionUpdateForm ->
             ( model
-            , Mission.update missionUpdateForm.id (Page.Mission.Model.formEncode model.missionUpdateForm)
+            , Mission.update missionUpdateForm.mission.id (Page.Mission.Model.formEncode model.missionUpdateForm)
                 |> HttpBuilder.send MissionUpdateComplete
             )
 

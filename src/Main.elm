@@ -20,7 +20,7 @@ import Page.Mission.Model exposing (initMissionUpdateForm)
 import Page.Missions.Main
 import RemoteData exposing (WebData)
 import Routing exposing (Route(..))
-import Update exposing (Msg(..), update)
+import Update exposing (Msg(..), changeRouteTo, update)
 import Url
 import View exposing (view)
 
@@ -38,20 +38,22 @@ dummyMission =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( { gradeLevels = RemoteData.NotAsked
-      , domains = RemoteData.NotAsked
-      , missions = RemoteData.NotAsked
-      , route = Routing.fromUrl url
-      , key = key
-      , missionUpdateForm = initMissionUpdateForm dummyMission
-      }
-    , Cmd.batch
-        -- TODO: if time, what do we do here instead?
-        [ Domain.index |> HttpBuilder.send DomainsLoadingComplete
-        , GradeLevel.index |> HttpBuilder.send GradeLevelsLoadingComplete
-        , Mission.index |> HttpBuilder.send MissionsLoadingComplete
-        ]
-    )
+    { gradeLevels = RemoteData.NotAsked
+    , domains = RemoteData.NotAsked
+    , missions = RemoteData.NotAsked
+    , route = Routing.fromUrl url
+    , key = key
+    , missionUpdateForm = initMissionUpdateForm dummyMission
+    }
+        |> changeRouteTo (Routing.fromUrl url)
+
+
+
+--     -- TODO: if time, what do we do here instead?
+--     [ Domain.index |> HttpBuilder.send DomainsLoadingComplete
+--     , GradeLevel.index |> HttpBuilder.send GradeLevelsLoadingComplete
+--     , Mission.index |> HttpBuilder.send MissionsLoadingComplete
+--     ]
 
 
 subscriptions : Model -> Sub Msg

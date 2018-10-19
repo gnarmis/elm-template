@@ -23,45 +23,48 @@ init missionId =
 view : Model -> MissionId -> Html Page.Mission.Update.Msg
 view ({ missionUpdateForm } as model) missionId =
     let
-        findMission missions =
-            missions
-                |> List.filter (\m -> m.id == missionId)
-                |> List.head
+        mission =
+            missionUpdateForm.mission
     in
-    case model.missions of
-        RemoteData.NotAsked ->
-            text "YOU FAIL"
 
-        RemoteData.Loading ->
-            text "Loading..."
+    -- let
+    --     findMission missions =
+    --         missions
+    --             |> List.filter (\m -> m.id == missionId)
+    --             |> List.head
+    -- in
+    -- case model.missions of
+    --     RemoteData.NotAsked ->
+    --         text "YOU FAIL"
 
-        RemoteData.Failure err ->
-            text (Debug.toString err)
+    --     RemoteData.Loading ->
+    --         text "Loading..."
 
-        RemoteData.Success missions ->
-            case findMission missions of
-                Just mission ->
-                    div []
-                        [ div []
-                            [ h1 []
-                                [ text "Mission" ]
-                            , p []
-                                [ text <| "mission_id: " ++ MissionId.toString mission.id ]
-                            , p []
-                                [ text <| "help_text: " ++ mission.helpText ]
-                            , p []
-                                [ text <| "active: " ++ Debug.toString mission.active ]
-                            ]
-                        , Html.form [ onSubmit SubmitMissionUpdateForm ]
-                            [ input [ name "id", type_ "hidden", value <| MissionId.toString missionUpdateForm.id ]
-                                []
-                            , textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
-                                [ text missionUpdateForm.helpText ]
-                            , input [ name "active", type_ "checkbox", value "true", checked missionUpdateForm.active, onCheck SetMissionUpdateFormActive ]
-                                []
-                            , button [] [ text "submit" ]
-                            ]
-                        ]
+    --     RemoteData.Failure err ->
+    --         text (Debug.toString err)
 
-                Nothing ->
-                    div [] [ text "Mission missing!" ]
+    --     RemoteData.Success missions ->
+    --         case findMission missions of
+                -- Just mission ->
+            div []
+                [ div []
+                    [ h1 []
+                        [ text "Mission" ]
+                    , p []
+                        [ text <| "mission_id: " ++ MissionId.toString mission.id ]
+                    , p []
+                        [ text <| "help_text: " ++ mission.helpText ]
+                    , p []
+                        [ text <| "active: " ++ Debug.toString mission.active ]
+                    ]
+                , Html.form [ onSubmit SubmitMissionUpdateForm ]
+                    [ textarea [ name "help_text", onInput SetMissionUpdateFormHelpText ]
+                        [ text missionUpdateForm.helpText ]
+                    , input [ name "active", type_ "checkbox", value "true", checked missionUpdateForm.active, onCheck SetMissionUpdateFormActive ]
+                        []
+                    , button [] [ text "submit" ]
+                    ]
+                ]
+
+                -- Nothing ->
+                --     div [] [ text "Mission missing!" ]

@@ -6,7 +6,7 @@ import Json.Encode as Encode
 
 
 type alias MissionUpdateForm =
-    { id : MissionId
+    { mission : Mission
     , helpText : String
     , active : Bool
     , errors : List String
@@ -15,7 +15,7 @@ type alias MissionUpdateForm =
 
 initMissionUpdateForm : Mission -> MissionUpdateForm
 initMissionUpdateForm mission =
-    { id = mission.id
+    { mission = mission
     , helpText = mission.helpText
     , active = mission.active
     , errors = []

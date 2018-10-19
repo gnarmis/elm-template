@@ -1,4 +1,4 @@
-module Update exposing (Msg(..), update)
+module Update exposing (Msg(..), update, changeRouteTo)
 
 import Browser
 import Browser.Navigation as Nav
@@ -42,12 +42,7 @@ update msg model =
             ( model, Nav.load href )
 
         ChangedUrl url ->
-            -- TODO: add a NotFound route!!!
-            case Maybe.withDefault CurriculumRoute <| Routing.fromUrl url of
-                CurriculumRoute ->
-                    ( { model | route = Routing.fromUrl url }, Cmd.none )
-                MissionRoute missionId ->
-                    ( { model | route = Routing.fromUrl url }, Page.Mission.Main.init missionId |> Cmd.map PageMissionUpdates )
+            changeRouteTo (Routing.fromUrl url) model
 
         PageMissionUpdates message ->
             let
@@ -55,3 +50,16 @@ update msg model =
                     Page.Mission.Update.update message model
             in
             ( updatedModel, pageCmd |> Cmd.map PageMissionUpdates )
+
+
+-- name is confusing
+-- TODO: add a NotFound route!!!
+changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo maybeRoute model =
+    case maybeRoute of
+        Just CurriculumRoute ->
+            ( { model | route = Just CurriculumRoute }, Cmd.none )
+        Just (MissionRoute missionId) ->
+            ( { model | route = Just (MissionRoute missionId) }, Page.Mission.Main.init missionId |> Cmd.map PageMissionUpdates )
+        Nothing ->
+            ( model, Cmd.none )

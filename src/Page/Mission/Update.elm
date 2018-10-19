@@ -6,7 +6,7 @@ import Http
 import HttpBuilder
 import Model exposing (Model)
 import Page.Mission.Model
-import RemoteData exposing (WebData)
+import RemoteData
 
 
 type Msg
@@ -35,9 +35,9 @@ update msg ({ missionUpdateForm } as model) =
             ( { model | missionUpdateForm = { missionUpdateForm | errors = Debug.toString err :: missionUpdateForm.errors } }, Cmd.none )
 
         MissionUpdateComplete (Ok mission) ->
-            ( model, Cmd.none )
+            case model.missions of
+                RemoteData.Success missions ->
+                    ( { model | missions = RemoteData.Success (mission :: missions) }, Cmd.none )
 
-
-
--- update the one reference
--- ( { model | missions = RemoteData.fromResult result }, Cmd.none )
+                _ ->
+                    ( model, Cmd.none )
